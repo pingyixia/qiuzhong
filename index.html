@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>秋招作战台</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f4f5f7;color:#111827;font-size:14px}
+body.noscroll{overflow:hidden}
+button{font-family:inherit}
+
+/* ---------- 顶栏 ---------- */
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px 20px;background:#fff;border-bottom:1px solid #e5e7eb;flex-wrap:wrap}
+.brand{font-weight:700;font-size:17px;white-space:nowrap}
+.tabs{display:flex;flex-wrap:wrap;background:#eef0f3;border-radius:10px;padding:3px;gap:2px}
+.tabs button{border:none;background:transparent;padding:6px 14px;border-radius:8px;font-size:14px;cursor:pointer;color:#4b5563}
+.tabs button.active{background:#fff;color:#4f46e5;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.spacer{flex:1}
+.btn{padding:8px 14px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#374151;font-size:14px;cursor:pointer}
+.btn:hover{background:#f9fafb}
+.btn.primary{background:#4f46e5;border-color:#4f46e5;color:#fff}
+.btn.primary:hover{background:#4338ca}
+.btn.danger{color:#b91c1c;border-color:#fca5a5}
+.btn.danger:hover{background:#fef2f2}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:7px}
+
+/* ---------- 主体 ---------- */
+main{max-width:1150px;margin:0 auto;padding:20px 16px 60px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.stat .n{font-size:26px;font-weight:700;line-height:1.2}
+.stat .l{font-size:12px;color:#6b7280;margin-top:2px}
+.stat .n.green{color:#059669}
+.stat .n.red{color:#b91c1c}
+.panel{background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.05);margin-bottom:16px;overflow:hidden}
+.panel-h{padding:12px 16px;font-weight:600;border-bottom:1px solid #f0f1f3;display:flex;align-items:center;gap:8px}
+.panel-h .hint{font-weight:400;font-size:12px;color:#9ca3af}
+.row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid #f3f4f6;font-size:13px}
+.row:first-of-type{border-top:none}
+.row .main{flex:1;min-width:0}
+.row .t1{font-weight:600}
+.row .t2{font-size:12px;color:#6b7280;margin-top:1px}
+.row .right{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.muted{color:#9ca3af;font-size:12px}
+
+.badge{font-size:12px;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.badge.red{background:#fee2e2;color:#b91c1c}
+.badge.amber{background:#fef3c7;color:#92400e}
+.badge.gray{background:#e5e7eb;color:#4b5563}
+.badge.green{background:#d1fae5;color:#065f46}
+.chip{font-size:12px;padding:2px 8px;border-radius:6px;white-space:nowrap;background:#eef2ff;color:#4338ca}
+.chip.chip-v{background:#ede9fe;color:#6d28d9}
+.chip.chip-a{background:#fef3c7;color:#92400e}
+.chip.chip-g{background:#e5e7eb;color:#4b5563}
+
+/* ---------- 看板 ---------- */
+.board-tools{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.board-tools input{flex:0 1 280px}
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;align-items:flex-start}
+.col{flex:0 0 252px;background:#eceef1;border-radius:12px;padding:8px}
+.col-head{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#374151;padding:4px 6px 8px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.count{margin-left:auto;background:#dfe2e7;border-radius:999px;font-size:11px;padding:1px 7px;color:#4b5563}
+.col-body{display:flex;flex-direction:column;gap:8px;min-height:90px;border-radius:8px;padding:2px}
+.col-body.over{outline:2px dashed #a5b4fc;outline-offset:-2px;background:#e4e7ff}
+.card{background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.06);cursor:grab;border:1px solid transparent}
+.card:hover{border-color:#c7d2fe;box-shadow:0 3px 8px rgba(0,0,0,.08)}
+.card.dragging{opacity:.35}
+.card-title{font-weight:600;font-size:14px}
+.card-pos{font-size:12px;color:#6b7280;margin-top:2px}
+.card-meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.empty{border:1.5px dashed #d1d5db;border-radius:12px;padding:28px 16px;text-align:center;color:#6b7280;background:#fbfbfc;margin-bottom:16px}
+.empty .btns{display:flex;gap:10px;justify-content:center;margin-top:14px}
+
+/* ---------- 表单 ---------- */
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:#111827}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+textarea{resize:vertical;min-height:56px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{font-size:12px;color:#6b7280}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+
+/* ---------- 弹窗 ---------- */
+.modal-back{position:fixed;inset:0;background:rgba(17,24,39,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal-back[hidden]{display:none}
+.modal{background:#fff;border-radius:16px;width:min(760px,96vw);max-height:92vh;overflow:auto}
+.modal.small{width:min(400px,96vw)}
+.modal-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid #f0f1f3}
+.modal-head h3{margin:0;font-size:16px}
+.modal-head .sub{font-size:12px;color:#6b7280}
+.modal-head .x{margin-left:auto}
+.x{width:30px;height:30px;border:none;background:#f3f4f6;border-radius:8px;font-size:15px;cursor:pointer;color:#6b7280}
+.x:hover{background:#e5e7eb}
+.modal-body{padding:16px 20px 20px}
+.modal-foot{display:flex;gap:8px;padding:14px 20px;border-top:1px solid #f0f1f3}
+.grow{flex:1}
+.sec{border-top:1px solid #f0f1f3;margin-top:8px;padding-top:14px}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-weight:600;font-size:14px}
+.sec-head .hint{font-weight:400;font-size:12px;color:#9ca3af}
+.formline{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.formline>*{flex:1 1 120px}
+.formline .w-s{flex:0 0 96px}
+.formline .btn{flex:0 0 auto}
+.evt-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed #f0f1f3;font-size:13px}
+.evt-row:last-child{border-bottom:none}
+.evt-row .main{flex:1;min-width:0}
+.del,.rb-del{border:none;background:none;color:#9ca3af;cursor:pointer;font-size:12px;padding:4px 6px;border-radius:6px}
+.del:hover,.rb-del:hover{color:#b91c1c;background:#fef2f2}
+.round-block{border:1px solid #f0f1f3;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fafafa}
+.rb-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rb-head .date{font-size:12px;color:#6b7280}
+.rb-head .stars{font-size:13px;color:#f59e0b;letter-spacing:1px}
+.rb-head .stars.off{color:#d1d5db}
+.rb-del{margin-left:auto}
+.rb-sec{margin-top:6px;font-size:13px}
+.rb-sec .lab{font-size:11px;color:#9ca3af;margin-bottom:2px}
+.rb-sec .txt{white-space:pre-wrap}
+.star-row{display:flex;gap:2px;align-items:center}
+.star-row button{background:none;border:none;font-size:20px;cursor:pointer;color:#d1d5db;padding:0 2px;line-height:1}
+.star-row button.on{color:#f59e0b}
+.star-row .lab{font-size:12px;color:#9ca3af;margin-left:6px}
+
+/* ---------- 打卡 ---------- */
+.prac-grid{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+.prac-form{display:flex;gap:10px;margin-bottom:12px}
+.heatmap{display:flex;flex-wrap:wrap;gap:3px}
+.hcell{width:18px;height:18px;border-radius:4px;background:#eef0f3}
+.hcell.l1{background:#c7d2fe}
+.hcell.l2{background:#818cf8}
+.hcell.l3{background:#4f46e5}
+.ph-title{font-size:12px;color:#9ca3af;margin:6px 0 2px}
+
+/* ---------- 抽题自测 ---------- */
+.quiz-box{border:1px dashed #c7d2fe;background:#f8f9ff;border-radius:10px;padding:10px 12px;margin:0 0 12px}
+.q-label{font-size:11px;color:#9ca3af;margin-bottom:4px}
+.q-text{font-weight:600;font-size:14px}
+.q-meta{font-size:12px;color:#6b7280;margin-top:4px}
+html[data-theme="dark"] .quiz-box{border-color:#4f46e5;background:#1b2440}
+
+/* ---------- 技能题库 ---------- */
+.res-manager{border:1px dashed #c7d2fe;background:#f8f9ff;border-radius:10px;padding:10px 12px;margin:-6px 0 12px}
+.rv-list{display:flex;flex-wrap:wrap;gap:6px}
+.rv-chip{display:inline-flex;align-items:center;gap:5px;background:#eef2ff;color:#4338ca;border-radius:999px;padding:3px 6px 3px 10px;font-size:12px}
+.rv-chip button{border:none;background:#dbe3ff;color:#4338ca;width:16px;height:16px;border-radius:50%;cursor:pointer;font-size:11px;line-height:1;padding:0}
+.rv-chip button:hover{background:#c7d2fe}
+.skill-card{border:1px solid #f0f1f3;border-radius:10px;margin-bottom:8px;background:#fff;overflow:hidden}
+.sk-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.sk-head:hover{background:#fafafa}
+.sk-name{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-body{border-top:1px dashed #f0f1f3;background:#fafafa;padding:4px 12px}
+.sk-select{flex:0 0 auto !important;width:auto;padding:4px 6px;font-size:12px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151}
+.badge.blue{background:#dbeafe;color:#1d4ed8}
+.linklike{background:none;border:none;color:#4f46e5;cursor:pointer;padding:0;font-size:12px;font-family:inherit}
+.linklike:hover{text-decoration:underline}
+
+/* ---------- Offer 对比 ---------- */
+.otable{width:100%;border-collapse:collapse;font-size:13px;min-width:1120px}
+.otable th{padding:8px 6px;text-align:left;font-size:12px;color:#6b7280;font-weight:600;border-bottom:1px solid #f0f1f3;white-space:nowrap}
+.otable td{padding:5px 6px;border-bottom:1px solid #f5f6f8}
+.otable tr.best td{background:#f0fdf9}
+.oin{padding:6px 8px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px;background:#fff}
+.oin:focus{outline:none;border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+.oin.txt{width:110px}
+.oin.num{width:88px}
+.oin.num.sm{width:64px}
+td.calc{white-space:nowrap;font-variant-numeric:tabular-nums;color:#374151}
+@media(max-width:700px){.prac-grid{grid-template-columns:1fr}}
+
+/* ---------- 云端同步 ---------- */
+.sqlbox{font-family:Consolas,monospace;font-size:12px;background:#f8f9fb;white-space:pre;overflow:auto;color:#111827}
+details.setup{margin-top:10px;font-size:13px}
+details.setup summary{cursor:pointer;color:#4f46e5;font-weight:600}
+.setup-body{padding:10px 0 0}
+.setup-body p{margin:6px 0}
+
+/* ---------- 其他 ---------- */
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(8px);background:#111827;color:#fff;padding:9px 18px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:99;max-width:86vw}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.datarow{display:flex;gap:10px;flex-wrap:wrap;padding:4px 0}
+.hiddenfile{display:none}
+/* ---------- 手机端自适应（视口 ≤768px 自动启用） ---------- */
+@media(max-width:768px){
+  .grid2{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat{padding:10px 12px}
+  .stat .n{font-size:20px}
+  .topbar{gap:8px;padding:8px 10px}
+  .brand{font-size:15px}
+  .tabs{width:100%;order:5;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{white-space:nowrap;padding:8px 12px}
+  .btn{padding:9px 14px}
+  .btn.sm{padding:6px 10px}
+  main{padding:12px 10px calc(70px + env(safe-area-inset-bottom))}
+  input,select,textarea{font-size:16px}
+  .modal-back{padding:0}
+  .modal{width:100vw;height:100vh;height:100dvh;max-height:100dvh;border-radius:0}
+  .modal-head{padding:12px 14px}
+  .modal-body{padding:14px 14px 20px}
+  .modal-foot{padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+  .board{scroll-snap-type:x mandatory}
+  .col{flex-basis:82%;scroll-snap-align:start}
+  .board-hint{text-align:center;color:#9ca3af;font-size:12px;padding:2px 0 6px}
+  .cal-cell{min-height:64px;padding:3px 4px;font-size:11px;border-radius:8px}
+  .cal-ev{font-size:10px;padding:1px 4px;margin-bottom:2px}
+  .cal-day{margin-bottom:2px}
+  .cal-cell.other{display:none}
+  .cal-head-row{font-size:11px;padding-bottom:6px}
+  .theme-panel{top:98px;right:8px}
+  .otable{min-width:900px}
+  .del,.rb-del{padding:8px}
+  .evt-row{flex-wrap:wrap}
+  .res-manager{margin-top:0}
+}
+
+/* ---------- 皮肤 ---------- */
+.theme-panel{position:fixed;top:54px;right:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.16);padding:8px;z-index:60;min-width:176px}
+.theme-title{font-size:12px;color:#9ca3af;padding:4px 10px 6px}
+.theme-opt{display:block;width:100%;text-align:left;padding:8px 10px;border:none;background:none;border-radius:8px;cursor:pointer;font-size:14px;color:#374151;font-family:inherit}
+.theme-opt:hover{background:#f3f4f6}
+.theme-opt.active{background:#eef2ff;color:#4f46e5;font-weight:600}
+
+/* 🍂 秋日暖橙 */
+html[data-theme="autumn"] body{background:#faf5ee}
+html[data-theme="autumn"] .topbar{background:#fffdf8;border-bottom-color:#eadfca}
+html[data-theme="autumn"] .tabs{background:#f3e9d8}
+html[data-theme="autumn"] .tabs button.active{color:#c2410c}
+html[data-theme="autumn"] .btn.primary{background:#ea580c;border-color:#ea580c}
+html[data-theme="autumn"] .btn.primary:hover{background:#c2410c}
+html[data-theme="autumn"] .card:hover{border-color:#fdba74}
+html[data-theme="autumn"] .col{background:#f5ead9}
+html[data-theme="autumn"] .chip{background:#ffedd5;color:#c2410c}
+html[data-theme="autumn"] .rv-chip{background:#ffedd5;color:#c2410c}
+html[data-theme="autumn"] .rv-chip button{background:#fed7aa;color:#c2410c}
+html[data-theme="autumn"] input:focus,html[data-theme="autumn"] select:focus,html[data-theme="autumn"] textarea:focus{border-color:#ea580c;box-shadow:0 0 0 3px rgba(234,88,12,.14)}
+html[data-theme="autumn"] .col-body.over{outline-color:#fdba74;background:#ffedd5}
+html[data-theme="autumn"] .linklike{color:#c2410c}
+html[data-theme="autumn"] .theme-opt.active{background:#ffedd5;color:#c2410c}
+html[data-theme="autumn"] .res-manager{border-color:#fdba74;background:#fff8ef}
+
+/* 🌸 樱花物语 */
+html[data-theme="sakura"] body{background:#fdf4f7}
+html[data-theme="sakura"] .topbar{background:#fffdfe;border-bottom-color:#f4d7e2}
+html[data-theme="sakura"] .tabs{background:#f8e6ee}
+html[data-theme="sakura"] .tabs button.active{color:#be185d}
+html[data-theme="sakura"] .btn.primary{background:#db2777;border-color:#db2777}
+html[data-theme="sakura"] .btn.primary:hover{background:#be185d}
+html[data-theme="sakura"] .card:hover{border-color:#f9a8d4}
+html[data-theme="sakura"] .col{background:#f7e8ee}
+html[data-theme="sakura"] .chip{background:#fce7f3;color:#be185d}
+html[data-theme="sakura"] .rv-chip{background:#fce7f3;color:#be185d}
+html[data-theme="sakura"] .rv-chip button{background:#fbcfe8;color:#be185d}
+html[data-theme="sakura"] input:focus,html[data-theme="sakura"] select:focus,html[data-theme="sakura"] textarea:focus{border-color:#db2777;box-shadow:0 0 0 3px rgba(219,39,119,.13)}
+html[data-theme="sakura"] .col-body.over{outline-color:#f9a8d4;background:#fce7f3}
+html[data-theme="sakura"] .linklike{color:#be185d}
+html[data-theme="sakura"] .theme-opt.active{background:#fce7f3;color:#be185d}
+html[data-theme="sakura"] .res-manager{border-color:#f9a8d4;background:#fff5f9}
+
+/* 🌿 抹茶清风 */
+html[data-theme="matcha"] body{background:#f2f8f1}
+html[data-theme="matcha"] .topbar{background:#fcfefc;border-bottom-color:#d5e6d3}
+html[data-theme="matcha"] .tabs{background:#e2efe0}
+html[data-theme="matcha"] .tabs button.active{color:#047857}
+html[data-theme="matcha"] .btn.primary{background:#059669;border-color:#059669}
+html[data-theme="matcha"] .btn.primary:hover{background:#047857}
+html[data-theme="matcha"] .card:hover{border-color:#6ee7b7}
+html[data-theme="matcha"] .col{background:#e6f0e4}
+html[data-theme="matcha"] .chip{background:#d1fae5;color:#047857}
+html[data-theme="matcha"] .rv-chip{background:#d1fae5;color:#047857}
+html[data-theme="matcha"] .rv-chip button{background:#a7f3d0;color:#047857}
+html[data-theme="matcha"] input:focus,html[data-theme="matcha"] select:focus,html[data-theme="matcha"] textarea:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.13)}
+html[data-theme="matcha"] .col-body.over{outline-color:#6ee7b7;background:#d1fae5}
+html[data-theme="matcha"] .linklike{color:#047857}
+html[data-theme="matcha"] .theme-opt.active{background:#d1fae5;color:#047857}
+html[data-theme="matcha"] .res-manager{border-color:#6ee7b7;background:#f4fbf3}
+
+/* 🌙 深夜模式 */
+html[data-theme="dark"]{color-scheme:dark}
+html[data-theme="dark"] body{background:#0f172a;color:#e2e8f0}
+html[data-theme="dark"] .topbar{background:#1e293b;border-bottom-color:#334155}
+html[data-theme="dark"] .brand{color:#f1f5f9}
+html[data-theme="dark"] .tabs{background:#0f172a}
+html[data-theme="dark"] .tabs button{color:#94a3b8}
+html[data-theme="dark"] .tabs button.active{background:#334155;color:#a5b4fc}
+html[data-theme="dark"] .btn{background:#334155;border-color:#475569;color:#e2e8f0}
+html[data-theme="dark"] .btn:hover{background:#475569}
+html[data-theme="dark"] .btn.primary{background:#6366f1;border-color:#6366f1;color:#fff}
+html[data-theme="dark"] .btn.primary:hover{background:#4f46e5}
+html[data-theme="dark"] .btn.danger{color:#fca5a5;border-color:#7f1d1d}
+html[data-theme="dark"] .btn.danger:hover{background:#450a0a}
+html[data-theme="dark"] .panel,html[data-theme="dark"] .stat,html[data-theme="dark"] .card,html[data-theme="dark"] .modal{background:#1e293b}
+html[data-theme="dark"] .card:hover{border-color:#6366f1;box-shadow:0 3px 10px rgba(0,0,0,.4)}
+html[data-theme="dark"] .col{background:#172033}
+html[data-theme="dark"] .col-head{color:#cbd5e1}
+html[data-theme="dark"] .count{background:#334155;color:#94a3b8}
+html[data-theme="dark"] .col-body.over{outline-color:#6366f1;background:#1d2a44}
+html[data-theme="dark"] .panel-h{border-bottom-color:#334155;color:#e2e8f0}
+html[data-theme="dark"] .row{border-top-color:#283548}
+html[data-theme="dark"] .muted,html[data-theme="dark"] .stat .l,html[data-theme="dark"] .row .t2,html[data-theme="dark"] .card-pos,html[data-theme="dark"] .modal-head .sub,html[data-theme="dark"] .panel-h .hint,html[data-theme="dark"] .sec-head .hint,html[data-theme="dark"] .ph-title,html[data-theme="dark"] .field label,html[data-theme="dark"] .otable th,html[data-theme="dark"] .star-row .lab{color:#94a3b8}
+html[data-theme="dark"] .stat .n{color:#f1f5f9}
+html[data-theme="dark"] .modal-head,html[data-theme="dark"] .modal-foot{border-color:#334155;background:#1e293b}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea,html[data-theme="dark"] .oin,html[data-theme="dark"] .sk-select{background:#0f172a;border-color:#475569;color:#e2e8f0}
+html[data-theme="dark"] input:focus,html[data-theme="dark"] select:focus,html[data-theme="dark"] textarea:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(129,140,248,.15)}
+html[data-theme="dark"] .sec,html[data-theme="dark"] .evt-row,html[data-theme="dark"] .otable td,html[data-theme="dark"] .sk-body{border-color:#283548}
+html[data-theme="dark"] .sec{border-top-color:#334155}
+html[data-theme="dark"] .x{background:#334155;color:#94a3b8}
+html[data-theme="dark"] .empty{background:#172033;border-color:#334155;color:#94a3b8}
+html[data-theme="dark"] .round-block{background:#172033;border-color:#334155}
+html[data-theme="dark"] .skill-card{background:#1e293b;border-color:#334155}
+html[data-theme="dark"] .sk-head:hover{background:#283548}
+html[data-theme="dark"] .hcell{background:#283548}
+html[data-theme="dark"] .otable tr.best td{background:#12332a}
+html[data-theme="dark"] td.calc{color:#cbd5e1}
+html[data-theme="dark"] .del:hover,html[data-theme="dark"] .rb-del:hover{background:#450a0a}
+html[data-theme="dark"] .sqlbox{background:#0f172a;border-color:#475569;color:#e2e8f0}
+html[data-theme="dark"] .rv-chip{background:#3730a3;color:#c7d2fe}
+html[data-theme="dark"] .rv-chip button{background:#4f46e5;color:#e0e7ff}
+html[data-theme="dark"] .res-manager{border-color:#4f46e5;background:#1b2440}
+html[data-theme="dark"] .linklike,html[data-theme="dark"] details.setup summary{color:#818cf8}
+html[data-theme="dark"] .theme-panel{background:#1e293b;border-color:#334155}
+html[data-theme="dark"] .theme-opt{color:#cbd5e1}
+html[data-theme="dark"] .theme-opt:hover{background:#283548}
+html[data-theme="dark"] .theme-opt.active{background:#312e81;color:#a5b4fc}
+html[data-theme="dark"] #toast{background:#334155}
+html[data-theme="dark"] .evt-row .del,html[data-theme="dark"] .rb-del{color:#64748b}
+
+/* ---------- 日历 ---------- */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:0 12px 12px}
+.cal-head-row{padding:2px 12px 8px;font-size:12px;color:#6b7280;text-align:center}
+.cal-head-row div{padding:4px 0}
+.cal-cell{background:#fff;border:1px solid #f0f1f3;border-radius:10px;min-height:92px;padding:6px;font-size:12px;overflow:hidden}
+.cal-cell.other{background:transparent;border-color:transparent;opacity:.4}
+.cal-cell.today{border-color:#6366f1;box-shadow:0 0 0 2px rgba(99,102,241,.18)}
+.cal-cell.clash{border-color:#fca5a5;background:#fff7f7}
+.cal-day{font-weight:600;margin-bottom:4px;color:#374151}
+.cal-clash{color:#b91c1c;font-size:11px;font-weight:700}
+.cal-ev{border-radius:6px;padding:2px 6px;margin-bottom:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-ev.k-v{background:#ede9fe;color:#6d28d9}
+.cal-ev.k-a{background:#fef3c7;color:#92400e}
+.cal-ev.k-r{background:#fee2e2;color:#b91c1c}
+.cal-ev.k-g{background:#d1fae5;color:#065f46}
+.oin.dt{width:120px}
+/* 桌面端看板网格铺开：所有状态列一目了然 */
+@media(min-width:769px){
+  .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));overflow-x:visible;padding-bottom:2px;align-items:start}
+}
+html[data-theme="dark"] .cal-cell{background:#1e293b;border-color:#283548}
+html[data-theme="dark"] .cal-cell.other{background:transparent;border-color:transparent}
+html[data-theme="dark"] .cal-cell.today{border-color:#818cf8;box-shadow:0 0 0 2px rgba(129,140,248,.2)}
+html[data-theme="dark"] .cal-cell.clash{border-color:#7f1d1d;background:#2a1518}
+html[data-theme="dark"] .cal-day{color:#cbd5e1}
+html[data-theme="autumn"] .cal-cell{background:#fffdf8;border-color:#eadfca}
+html[data-theme="autumn"] .cal-cell.today{border-color:#ea580c;box-shadow:0 0 0 2px rgba(234,88,12,.15)}
+html[data-theme="sakura"] .cal-cell{background:#fffdfe;border-color:#f4d7e2}
+html[data-theme="sakura"] .cal-cell.today{border-color:#db2777;box-shadow:0 0 0 2px rgba(219,39,119,.15)}
+html[data-theme="matcha"] .cal-cell{background:#fcfefc;border-color:#d5e6d3}
+html[data-theme="matcha"] .cal-cell.today{border-color:#059669;box-shadow:0 0 0 2px rgba(5,150,105,.15)}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">🎯 秋招作战台</div>
+  <nav class="tabs">
+    <button data-view="dashboard" class="active">仪表盘</button>
+    <button data-view="board">投递看板</button>
+    <button data-view="calendar">📅 日历</button>
+    <button data-view="practice">刷题打卡</button>
+    <button data-view="skills">技能题库</button>
+    <button data-view="offers">Offer 对比</button>
+    <button data-view="data">数据</button>
+  </nav>
+  <div class="spacer"></div>
+  <button class="btn" id="btnTheme" title="切换皮肤">🎨</button>
+  <button class="btn" id="btnAccount">👤 账号</button>
+  <button class="btn primary" data-act="add">＋ 新建投递</button>
+</header>
+
+<main>
+  <!-- 仪表盘 -->
+  <section id="view-dashboard"></section>
+
+  <!-- 看板 -->
+  <section id="view-board" hidden>
+    <div class="board-tools">
+      <input id="boardSearch" type="search" placeholder="搜索公司 / 岗位 / 关键词…">
+    </div>
+    <div id="boardWrap"></div>
+  </section>
+
+  <!-- 日历 -->
+  <section id="view-calendar" hidden>
+    <div class="panel">
+      <div class="panel-h" style="flex-wrap:wrap;gap:8px">
+        <button class="btn sm" id="calPrev">◀</button>
+        <span id="calTitle" style="font-weight:700;min-width:104px;text-align:center"></span>
+        <button class="btn sm" id="calNext">▶</button>
+        <button class="btn sm" id="calToday">今天</button>
+        <span class="hint">⚠ = 当天多场安排撞档 · 点事项可打开公司详情</span>
+        <span style="margin-left:auto"><button class="btn sm primary" id="btnExportIcs">⬇ 导出系统日历 (.ics)</button></span>
+      </div>
+      <div class="cal-grid cal-head-row">
+        <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
+      </div>
+      <div class="cal-grid" id="calBody"></div>
+    </div>
+  </section>
+
+  <!-- 刷题打卡 -->
+  <section id="view-practice" hidden>
+    <div class="stats" id="pracStats"></div>
+    <div class="prac-grid">
+      <div class="panel">
+        <div class="panel-h" id="pracTodayTitle">📅 今日打卡</div>
+        <div style="padding:14px 16px">
+          <div class="prac-form">
+            <div class="field"><label>简单</label><input id="pEasy" type="number" min="0" value="0"></div>
+            <div class="field"><label>中等</label><input id="pMid" type="number" min="0" value="0"></div>
+            <div class="field"><label>困难</label><input id="pHard" type="number" min="0" value="0"></div>
+          </div>
+          <button class="btn primary" id="btnPractice" style="width:100%">保存今日打卡</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-h">🔥 最近 28 天<span class="hint">颜色越深刷得越多</span></div>
+        <div style="padding:14px 16px">
+          <div id="heatmap" class="heatmap"></div>
+          <div id="pracHistory" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 技能题库 -->
+  <section id="view-skills" hidden>
+    <div class="stats" id="skStats"></div>
+    <div class="panel">
+      <div class="panel-h">🧠 关键技能<span class="hint">掌握度低的排前面 · 面试题按技能名从各公司复盘自动归类</span>
+        <span style="margin-left:auto"><button class="btn sm" id="btnQuiz" type="button">🎲 抽题自测</button></span>
+      </div>
+      <div id="quizBox" class="quiz-box" hidden></div>
+      <div style="padding:12px 16px 0">
+        <div class="formline">
+          <input id="skName" placeholder="技能名，如：Redis / 操作系统 / 系统设计">
+          <select id="skMastery" class="w-s">
+            <option value="0">未评估</option>
+            <option value="1">薄弱</option>
+            <option value="2" selected>一般</option>
+            <option value="3">熟悉</option>
+            <option value="4">扎实</option>
+            <option value="5">精通</option>
+          </select>
+          <button class="btn primary" id="btnAddSkill">添加技能</button>
+          <button class="btn" id="btnSkillFromJD">从 JD 关键词导入</button>
+        </div>
+      </div>
+      <div id="skillsList" style="padding:12px 16px 16px"></div>
+    </div>
+  </section>
+
+  <!-- Offer 对比 -->
+  <section id="view-offers" hidden>
+    <div class="panel">
+      <div class="panel-h">⚖️ Offer 对比<span class="hint">实时计算 · 自动保存 · 税前总包粗略对比</span>
+        <span style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn sm" id="btnPullOffers">从看板拉取 Offer 公司</button>
+          <button class="btn sm primary" id="btnAddOffer">＋ 添加一行</button>
+        </span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="otable">
+          <thead><tr>
+            <th>公司</th><th>岗位</th><th>月薪</th><th>月数</th><th>签字费</th><th>月补贴</th><th>股票/年</th><th>公积金%</th><th>答复截止</th><th>年包</th><th>首年包</th><th>到手/月</th><th></th>
+          </tr></thead>
+          <tbody id="offerBody"></tbody>
+        </table>
+      </div>
+      <div class="row" id="offerBest" hidden style="font-weight:600"></div>
+      <div class="row"><div class="muted">年包 = 月薪×月数 + 月补贴×12 + 股票年摊 + 单位公积金（月薪×12×公积金%）；首年包 = 年包 + 签字费。到手/月 = 仅按月薪部分估算税后（五险一金个人约 10.5% + 公积金%，个税按年度税率表累计口径、未计专项附加扣除与签字费/股票的税），仅供横向参考。</div></div>
+    </div>
+  </section>
+
+  <!-- 数据 -->
+  <section id="view-data" hidden>
+    <div class="panel">
+      <div class="panel-h">☁️ 云端同步<span class="hint" id="syncStatus"></span></div>
+      <div id="syncPanel"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h">数据管理</div>
+      <div class="row"><div class="main"><div class="t1">备份与恢复</div><div class="t2">数据保存在当前浏览器（localStorage），换浏览器或换电脑不会自动同步，请定期导出备份。</div></div></div>
+      <div class="row">
+        <div class="main"><div id="dataStats" class="muted"></div></div>
+        <div class="right">
+          <button class="btn" id="btnExport">导出 JSON 备份</button>
+          <button class="btn" id="importBtn">导入 JSON</button>
+          <input type="file" id="importFile" accept=".json,application/json" class="hiddenfile">
+        </div>
+      </div>
+      <div class="row">
+        <div class="main"><div class="t1">示例数据</div><div class="t2">载入几家示例公司，快速看看各项功能长什么样。</div></div>
+        <div class="right"><button class="btn" data-act="sample">载入示例数据</button></div>
+      </div>
+      <div class="row">
+        <div class="main"><div class="t1">清空数据</div><div class="t2">删除全部公司及记录，不可恢复，建议先导出备份。</div></div>
+        <div class="right"><button class="btn danger" id="btnClear">清空全部</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- 新建投递 -->
+<div id="addBack" class="modal-back" hidden>
+  <div class="modal small">
+    <div class="modal-head"><h3>新建投递</h3><button class="x" data-act="close-add">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>公司名称 *</label><input id="addName" placeholder="如：字节跳动"></div>
+      <div class="field"><label>岗位</label><input id="addPos" placeholder="如：后端开发工程师"></div>
+      <div class="modal-foot" style="border:none;padding:0">
+        <div class="grow"></div>
+        <button class="btn" data-act="close-add">取消</button>
+        <button class="btn primary" id="btnCreate">创建</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 公司详情 -->
+<div id="modalBack" class="modal-back" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3 id="mTitle">公司</h3><div class="sub" id="mSub"></div></div>
+      <button class="x grow2" id="btnCloseHead" style="margin-left:auto">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2">
+        <div class="field"><label>公司名称</label><input id="fName"></div>
+        <div class="field"><label>岗位</label><input id="fPosition"></div>
+        <div class="field"><label>状态</label><select id="fStatus"></select></div>
+        <div class="field"><label>网申截止日期</label><input id="fDeadline" type="date"></div>
+        <div class="field"><label>简历版本</label><div style="display:flex;gap:8px"><select id="fResume" style="flex:1"></select><button class="btn sm" id="btnRvManage" type="button">管理</button></div></div>
+        <div class="field"><label>投递链接</label><input id="fUrl" placeholder="https://…"></div>
+      </div>
+      <div id="resumeManager" class="res-manager" hidden></div>
+      <div class="field"><label>JD 关键词（技术栈 / 要求）</label><input id="fKeywords" placeholder="如：Go MySQL Redis 微服务"></div>
+      <div class="field"><label>备注</label><textarea id="fNotes" placeholder="内推人、进展沟通记录、薪资信息等"></textarea></div>
+
+      <div class="sec">
+        <div class="sec-head">日程安排 <span class="hint">笔试 / 面试时间，会显示在仪表盘</span></div>
+        <div class="formline">
+          <select id="evtType" class="w-s"><option>笔试</option><option>面试</option><option>其他</option></select>
+          <input id="evtTime" type="datetime-local">
+          <input id="evtNote" placeholder="备注（如：牛客平台 / 视频面试）">
+          <button class="btn primary" id="btnAddEvt">添加</button>
+        </div>
+        <div id="evtList"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-head">面试复盘 <span class="hint">每轮结束后记一笔，越记越强</span></div>
+        <div class="formline">
+          <select id="rdRound" class="w-s"><option>笔试</option><option>一面</option><option>二面</option><option>三面</option><option>HR面</option><option>其他</option></select>
+          <input id="rdDate" type="date">
+          <div class="star-row" id="rdStars"></div>
+        </div>
+        <div class="field"><label>被问了什么</label><textarea id="rdQ" placeholder="记录面试题、追问点"></textarea></div>
+        <div class="field"><label>复盘与改进</label><textarea id="rdT" placeholder="哪里答得不好、下次要准备什么"></textarea></div>
+        <button class="btn primary" id="btnAddRound">添加复盘</button>
+        <div id="roundList" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn danger" id="btnDelCompany">删除公司</button>
+      <div class="grow"></div>
+      <button class="btn" id="btnCloseModal">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div id="themePanel" class="theme-panel" hidden></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ================= 数据层 ================= */
+const KEY = 'qiuzhong-tracker-v1';
+const STATUSES = [
+  {key:'wishlist', label:'待投递', color:'#64748b'},
+  {key:'applied',  label:'已投递', color:'#3b82f6'},
+  {key:'written',  label:'笔试',   color:'#8b5cf6'},
+  {key:'interview',label:'面试中', color:'#f59e0b'},
+  {key:'offer',    label:'Offer', color:'#10b981'},
+  {key:'rejected', label:'已挂',   color:'#94a3b8'},
+];
+const SM = Object.fromEntries(STATUSES.map(s => [s.key, s]));
+const EVT_CLS = {'笔试':'chip-v', '面试':'chip-a', '其他':'chip-g'};
+const WEEK = ['日','一','二','三','四','五','六'];
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      if(d && Array.isArray(d.companies)) return d;
+    }
+  }catch(e){}
+  return {companies:[]};
+}
+let data = load();
+function save(){
+  if(!data.meta || typeof data.meta !== 'object') data.meta = {};
+  data.meta.updatedAt = Date.now();
+  localStorage.setItem(KEY, JSON.stringify(data));
+  queueCloudPush();
+}
+function uid(){
+  return (crypto.randomUUID ? crypto.randomUUID()
+    : 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8));
+}
+function byId(id){ return data.companies.find(c => c.id === id); }
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g,
+    c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function today0(){ const d = new Date(); d.setHours(0,0,0,0); return d; }
+function parseDate(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function dayDiff(s){ return Math.round((parseDate(s) - today0()) / 864e5); }
+function fmtDate(s){ const d = parseDate(s); return (d.getMonth()+1) + '月' + d.getDate() + '日'; }
+function fmtDateTime(s){
+  const [d, t] = s.split('T'); const dd = parseDate(d);
+  return (dd.getMonth()+1) + '月' + dd.getDate() + '日(周' + WEEK[dd.getDay()] + ') ' + t;
+}
+function dstr(off){
+  const d = today0(); d.setDate(d.getDate() + off);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function tstr(off, hhmm){ return dstr(off) + 'T' + hhmm; }
+
+function normalize(o){
+  if(!o || !o.name) return null;
+  return {
+    id: o.id || uid(),
+    name: String(o.name),
+    position: o.position || '',
+    status: SM[o.status] ? o.status : 'wishlist',
+    deadline: o.deadline || '',
+    resumeVersion: o.resumeVersion || '',
+    url: o.url || '',
+    jdKeywords: o.jdKeywords || '',
+    notes: o.notes || '',
+    events: Array.isArray(o.events) ? o.events.map(e => ({
+      id: e.id || uid(), type: e.type || '其他', time: e.time || '', note: e.note || ''
+    })).filter(e => e.time) : [],
+    rounds: Array.isArray(o.rounds) ? o.rounds.map(r => ({
+      id: r.id || uid(), round: r.round || '其他', date: r.date || dstr(0),
+      rating: Math.max(0, Math.min(5, Number(r.rating) || 0)),
+      questions: r.questions || '', takeaways: r.takeaways || ''
+    })) : [],
+    createdAt: o.createdAt || Date.now(),
+    updatedAt: o.updatedAt || Date.now(),
+  };
+}
+
+/* ================= 视图切换 ================= */
+const $ = id => document.getElementById(id);
+const viewEls = {dashboard:$('view-dashboard'), board:$('view-board'), calendar:$('view-calendar'),
+  practice:$('view-practice'), skills:$('view-skills'), offers:$('view-offers'), data:$('view-data')};
+let search = '';
+
+function switchView(name){
+  document.querySelectorAll('.tabs button').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === name));
+  for(const k in viewEls) viewEls[k].hidden = (k !== name);
+  try{ setUiPatch({view: name}); }catch(e){}
+  renderAll();
+}
+document.querySelectorAll('.tabs button').forEach(b =>
+  b.addEventListener('click', () => switchView(b.dataset.view)));
+
+function renderAll(){ renderDashboard(); renderBoard(); renderCalendar(); renderPractice(); renderSkills(); renderOffers(); renderDataStats(); renderSyncPanel(); }
+
+/* ================= 仪表盘 ================= */
+function badgeForDeadline(dl){
+  if(dl < 0)  return '<span class="badge red">已截止' + (-dl) + '天</span>';
+  if(dl === 0) return '<span class="badge red">今天截止</span>';
+  if(dl <= 3) return '<span class="badge red">剩 ' + dl + ' 天</span>';
+  if(dl <= 7) return '<span class="badge amber">剩 ' + dl + ' 天</span>';
+  return '<span class="badge gray">剩 ' + dl + ' 天</span>';
+}
+
+function renderDashboard(){
+  const cs = data.companies;
+  if(cs.length === 0){
+    viewEls.dashboard.innerHTML =
+      '<div class="empty"><div style="font-size:15px;font-weight:600;margin-bottom:6px">还没有任何投递记录</div>' +
+      '<div>点右上角「＋ 新建投递」添加第一家，或先载入示例数据看看效果。</div>' +
+      '<div class="btns"><button class="btn primary" data-act="add">＋ 新建投递</button>' +
+      '<button class="btn" data-act="sample">载入示例数据</button></div></div>';
+    return;
+  }
+  const total = cs.length;
+  const active = cs.filter(c => c.status !== 'offer' && c.status !== 'rejected').length;
+  const offers = cs.filter(c => c.status === 'offer').length;
+  const rejected = cs.filter(c => c.status === 'rejected').length;
+
+  const now = new Date();
+  const in7 = new Date(now.getTime() + 7*864e5);
+  const evts = [];
+  cs.forEach(c => (c.events || []).forEach(ev => {
+    if(!ev.time) return;
+    const t = new Date(ev.time);
+    if(t >= now && t <= in7) evts.push({c, ev, t});
+  }));
+  evts.sort((a,b) => a.t - b.t);
+
+  const evRows = evts.length ? evts.map(({c, ev, t}) => {
+    const diff = dayDiff(ev.time.slice(0,10));
+    const tag = diff === 0 ? '<span class="badge red">今天</span>'
+              : diff === 1 ? '<span class="badge amber">明天</span>'
+              : '<span class="badge gray">周' + WEEK[t.getDay()] + '</span>';
+    return '<div class="row"><span class="chip ' + (EVT_CLS[ev.type]||'chip-g') + '">' + esc(ev.type) + '</span>' +
+      '<div class="main"><div class="t1">' + esc(c.name) + '</div>' +
+      (ev.note ? '<div class="t2">' + esc(ev.note) + '</div>' : '') + '</div>' +
+      '<div class="right">' + tag + '<span class="muted">' + fmtDateTime(ev.time) + '</span></div></div>';
+  }).join('') : '<div class="row"><div class="main muted">未来 7 天没有笔试 / 面试安排</div></div>';
+
+  const ddls = cs.filter(c => c.deadline && (c.status === 'wishlist' || c.status === 'applied'))
+    .sort((a,b) => a.deadline.localeCompare(b.deadline));
+  const ddlRows = ddls.length ? ddls.map(c => {
+    const dl = dayDiff(c.deadline);
+    return '<div class="row"><div class="main"><div class="t1">' + esc(c.name) + '</div>' +
+      (c.position ? '<div class="t2">' + esc(c.position) + '</div>' : '') + '</div>' +
+      '<div class="right"><span class="muted">' + fmtDate(c.deadline) + '</span>' + badgeForDeadline(dl) + '</div></div>';
+  }).join('') : '<div class="row"><div class="main muted">没有待处理的网申截止日期</div></div>';
+
+  const odls = (data.offers || []).filter(o => o && o.deadline)
+    .sort((a,b) => a.deadline.localeCompare(b.deadline));
+  const odlPanel = odls.length ? '<div class="panel"><div class="panel-h">⚖️ Offer 决策倒计时<span class="hint">别让到手的 offer 过期</span></div>' +
+    odls.map(o => '<div class="row"><div class="main"><div class="t1">' + esc(o.company || '未命名 Offer') + '</div>' +
+      (o.position ? '<div class="t2">' + esc(o.position) + '</div>' : '') + '</div>' +
+      '<div class="right"><span class="muted">' + fmtDate(o.deadline) + '</span>' + badgeForDeadline(dayDiff(o.deadline)) + '</div></div>').join('') + '</div>' : '';
+
+  viewEls.dashboard.innerHTML =
+    '<div class="stats">' +
+      '<div class="stat"><div class="n">' + total + '</div><div class="l">投递总数</div></div>' +
+      '<div class="stat"><div class="n">' + active + '</div><div class="l">进行中</div></div>' +
+      '<div class="stat"><div class="n green">' + offers + '</div><div class="l">Offer</div></div>' +
+      '<div class="stat"><div class="n red">' + rejected + '</div><div class="l">已挂</div></div>' +
+      '<div class="stat"><div class="n">' + pracSum(7) + '</div><div class="l">本周刷题</div></div>' +
+      '<div class="stat"><div class="n' + (weakSkills() ? ' red' : '') + '">' + weakSkills() + '</div><div class="l">薄弱技能</div></div>' +
+    '</div>' +
+    odlPanel +
+    '<div class="panel"><div class="panel-h">📅 未来 7 天日程</div>' + evRows + '</div>' +
+    '<div class="panel"><div class="panel-h">⏰ 网申 DDL<span class="hint">仅「待投递 / 已投递」状态的公司</span></div>' + ddlRows + '</div>';
+}
+
+/* ================= 看板 ================= */
+function matchesSearch(c){
+  if(!search) return true;
+  return (c.name + ' ' + c.position + ' ' + c.jdKeywords + ' ' + c.notes).toLowerCase().includes(search);
+}
+function nextEventChip(c){
+  const now = new Date();
+  const up = (c.events || []).filter(e => e.time && new Date(e.time) >= now)
+    .sort((a,b) => a.time.localeCompare(b.time))[0];
+  if(!up) return '';
+  const t = new Date(up.time);
+  const md = (t.getMonth()+1) + '/' + t.getDate();
+  const hm = up.time.slice(11,16);
+  return '<span class="chip ' + (EVT_CLS[up.type]||'chip-g') + '">' + esc(up.type) + ' ' + md + ' ' + hm + '</span>';
+}
+function cardHTML(c){
+  const showDdl = c.deadline && c.status !== 'offer' && c.status !== 'rejected';
+  return '<div class="card" draggable="true" data-id="' + c.id + '">' +
+    '<div class="card-title">' + esc(c.name) + '</div>' +
+    (c.position ? '<div class="card-pos">' + esc(c.position) + '</div>' : '') +
+    '<div class="card-meta">' +
+      (showDdl ? badgeForDeadline(dayDiff(c.deadline)) : '') +
+      nextEventChip(c) +
+    '</div></div>';
+}
+function renderBoard(){
+  const wrap = $('boardWrap');
+  if(data.companies.length === 0){
+    wrap.innerHTML = '<div class="empty"><div style="font-size:15px;font-weight:600;margin-bottom:6px">看板空空如也</div>' +
+      '<div>把每家要投的公司建成一张卡片，拖动卡片就能推进状态。</div>' +
+      '<div class="btns"><button class="btn primary" data-act="add">＋ 新建投递</button>' +
+      '<button class="btn" data-act="sample">载入示例数据</button></div></div>';
+    return;
+  }
+  const list = data.companies.filter(matchesSearch);
+  const cols = STATUSES.map(s => {
+    const cards = list.filter(c => c.status === s.key).sort((a,b) => {
+      const da = a.deadline || '9999', db = b.deadline || '9999';
+      if(da !== db) return da < db ? -1 : 1;
+      return (a.name || '').localeCompare(b.name || '', 'zh');
+    });
+    return '<div class="col"><div class="col-head"><span class="dot" style="background:' + s.color + '"></span>' +
+      s.label + '<span class="count">' + cards.length + '</span></div>' +
+      '<div class="col-body" data-status="' + s.key + '">' + cards.map(cardHTML).join('') + '</div></div>';
+  }).join('');
+  wrap.innerHTML = (document.documentElement.classList.contains('mobile')
+    ? '<div class="board-hint">← 左右滑动切换状态列 · 点卡片可改状态 →</div>' : '') +
+    '<div class="board">' + cols + '</div>';
+}
+
+$('boardSearch').addEventListener('input', e => {
+  search = e.target.value.trim().toLowerCase();
+  renderBoard();
+});
+
+/* 拖拽换状态 */
+const boardEl = viewEls.board;
+boardEl.addEventListener('dragstart', e => {
+  const card = e.target.closest('.card');
+  if(!card) return;
+  e.dataTransfer.setData('text/plain', card.dataset.id);
+  e.dataTransfer.effectAllowed = 'move';
+  card.classList.add('dragging');
+});
+boardEl.addEventListener('dragend', () => {
+  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+  document.querySelectorAll('.col-body.over').forEach(el => el.classList.remove('over'));
+});
+boardEl.addEventListener('dragover', e => {
+  const body = e.target.closest('.col-body');
+  if(body){ e.preventDefault(); body.classList.add('over'); }
+});
+boardEl.addEventListener('dragleave', e => {
+  const body = e.target.closest('.col-body');
+  if(body) body.classList.remove('over');
+});
+boardEl.addEventListener('drop', e => {
+  const body = e.target.closest('.col-body');
+  if(!body) return;
+  e.preventDefault();
+  body.classList.remove('over');
+  const id = e.dataTransfer.getData('text/plain');
+  const c = byId(id);
+  if(c && c.status !== body.dataset.status){
+    c.status = body.dataset.status;
+    c.updatedAt = Date.now();
+    save(); renderAll();
+    toast('「' + c.name + '」→ ' + SM[c.status].label);
+  }
+});
+boardEl.addEventListener('click', e => {
+  const card = e.target.closest('.card');
+  if(card) openCompany(card.dataset.id);
+});
+
+/* ================= 公司详情弹窗 ================= */
+let modalId = null;
+let starRating = 0;
+const modalBack = $('modalBack');
+
+(function initStatusSelect(){
+  $('fStatus').innerHTML = STATUSES.map(s =>
+    '<option value="' + s.key + '">' + s.label + '</option>').join('');
+})();
+function fillResumeOptions(current){
+  const opts = [''].concat(data.resumeVersions || []);
+  if(current && opts.indexOf(current) < 0) opts.unshift(current);
+  $('fResume').innerHTML = opts.map(v =>
+    '<option value="' + esc(v) + '"' + (v === (current || '') ? ' selected' : '') + '>' +
+    (v === '' ? '未指定' : esc(v)) + '</option>').join('');
+}
+
+function openCompany(id){
+  const c = byId(id);
+  if(!c) return;
+  modalId = id;
+  starRating = 0;
+  $('mTitle').textContent = c.name || '未命名公司';
+  $('mSub').textContent = c.position || '';
+  $('fName').value = c.name;
+  $('fPosition').value = c.position;
+  $('fStatus').value = c.status;
+  $('fDeadline').value = c.deadline;
+  fillResumeOptions(c.resumeVersion);
+  if(!$('resumeManager').hidden) renderResumeManager();
+  $('fUrl').value = c.url;
+  $('fKeywords').value = c.jdKeywords;
+  $('fNotes').value = c.notes;
+  $('evtType').value = '笔试';
+  $('evtTime').value = '';
+  $('evtNote').value = '';
+  $('rdRound').value = '一面';
+  $('rdDate').value = dstr(0);
+  $('rdQ').value = '';
+  $('rdT').value = '';
+  updateStars();
+  renderEvtList(c);
+  renderRoundList(c);
+  modalBack.hidden = false;
+  document.body.classList.add('noscroll');
+}
+function closeModal(){
+  modalId = null;
+  modalBack.hidden = true;
+  document.body.classList.remove('noscroll');
+}
+
+/* 弹窗内字段实时保存 */
+function bindField(elId, prop, onChange){
+  $(elId).addEventListener('input', apply);
+  $(elId).addEventListener('change', apply);
+  function apply(){
+    const c = byId(modalId);
+    if(!c) return;
+    c[prop] = $(elId).value;
+    c.updatedAt = Date.now();
+    save();
+    if(prop === 'name') $('mTitle').textContent = c.name || '未命名公司';
+    if(prop === 'position') $('mSub').textContent = c.position || '';
+    renderDashboard(); renderBoard(); renderDataStats();
+  }
+}
+bindField('fName','name');
+bindField('fPosition','position');
+bindField('fStatus','status');
+bindField('fDeadline','deadline');
+bindField('fResume','resumeVersion');
+bindField('fUrl','url');
+bindField('fKeywords','jdKeywords');
+bindField('fNotes','notes');
+
+/* 日程 */
+function renderEvtList(c){
+  const list = (c.events || []).slice().sort((a,b) => a.time.localeCompare(b.time));
+  $('evtList').innerHTML = list.length ? list.map(ev =>
+    '<div class="evt-row"><span class="chip ' + (EVT_CLS[ev.type]||'chip-g') + '">' + esc(ev.type) + '</span>' +
+    '<div class="main"><b>' + fmtDateTime(ev.time) + '</b>' +
+    (ev.note ? ' <span class="muted">· ' + esc(ev.note) + '</span>' : '') + '</div>' +
+    '<button class="del" data-delevt="' + ev.id + '">删除</button></div>'
+  ).join('') : '<div class="muted" style="padding:4px 0">还没有日程</div>';
+}
+$('btnAddEvt').addEventListener('click', () => {
+  const c = byId(modalId);
+  if(!c) return;
+  const t = $('evtTime').value;
+  if(!t){ toast('请先选择日期时间'); return; }
+  c.events.push({id: uid(), type: $('evtType').value, time: t, note: $('evtNote').value.trim()});
+  c.updatedAt = Date.now();
+  save();
+  renderEvtList(c); renderDashboard(); renderBoard();
+  $('evtTime').value = ''; $('evtNote').value = '';
+  toast('已添加日程');
+});
+$('evtList').addEventListener('click', e => {
+  const b = e.target.closest('[data-delevt]');
+  if(!b) return;
+  const c = byId(modalId);
+  const ev = c.events.find(x => x.id === b.dataset.delevt);
+  if(!ev) return;
+  if(!confirm('删除日程：' + ev.type + ' ' + fmtDateTime(ev.time) + ' ？')) return;
+  c.events = c.events.filter(x => x.id !== ev.id);
+  save();
+  renderEvtList(c); renderDashboard(); renderBoard();
+});
+
+/* 复盘 */
+(function initStars(){
+  const box = $('rdStars');
+  box.innerHTML = '<button data-v="1">★</button><button data-v="2">★</button><button data-v="3">★</button><button data-v="4">★</button><button data-v="5">★</button><span class="lab">自我表现评分</span>';
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b) return;
+    const v = Number(b.dataset.v);
+    starRating = (starRating === v) ? 0 : v;
+    updateStars();
+  });
+})();
+function updateStars(){
+  $('rdStars').querySelectorAll('button').forEach(b =>
+    b.classList.toggle('on', Number(b.dataset.v) <= starRating));
+}
+function starText(n){ return n > 0 ? '★'.repeat(n) + '☆'.repeat(5-n) : '未评分'; }
+function renderRoundList(c){
+  const list = (c.rounds || []).slice().sort((a,b) => b.date.localeCompare(a.date));
+  $('roundList').innerHTML = list.length ? list.map(r =>
+    '<div class="round-block"><div class="rb-head">' +
+    '<span class="chip">' + esc(r.round) + '</span>' +
+    '<span class="date">' + fmtDate(r.date) + '</span>' +
+    '<span class="stars' + (r.rating ? '' : ' off') + '">' + starText(r.rating) + '</span>' +
+    '<button class="rb-del" data-delround="' + r.id + '">删除</button></div>' +
+    (r.questions ? '<div class="rb-sec"><div class="lab">被问了什么</div><div class="txt">' + esc(r.questions) + '</div></div>' : '') +
+    (r.takeaways ? '<div class="rb-sec"><div class="lab">复盘与改进</div><div class="txt">' + esc(r.takeaways) + '</div></div>' : '') +
+    '</div>'
+  ).join('') : '<div class="muted" style="padding:4px 0">还没有复盘记录</div>';
+}
+$('btnAddRound').addEventListener('click', () => {
+  const c = byId(modalId);
+  if(!c) return;
+  const d = $('rdDate').value;
+  if(!d){ toast('请选择日期'); return; }
+  c.rounds.push({
+    id: uid(), round: $('rdRound').value, date: d, rating: starRating,
+    questions: $('rdQ').value.trim(), takeaways: $('rdT').value.trim()
+  });
+  c.updatedAt = Date.now();
+  save();
+  renderRoundList(c);
+  $('rdQ').value = ''; $('rdT').value = '';
+  starRating = 0; updateStars();
+  toast('已添加复盘');
+});
+$('roundList').addEventListener('click', e => {
+  const b = e.target.closest('[data-delround]');
+  if(!b) return;
+  const c = byId(modalId);
+  if(!confirm('删除这条复盘记录？')) return;
+  c.rounds = c.rounds.filter(x => x.id !== b.dataset.delround);
+  save();
+  renderRoundList(c);
+});
+
+/* 删除 / 关闭 */
+$('btnDelCompany').addEventListener('click', () => {
+  const c = byId(modalId);
+  if(!c) return;
+  if(!confirm('确定删除「' + c.name + '」及其全部日程和复盘记录？')) return;
+  data.companies = data.companies.filter(x => x.id !== c.id);
+  save(); closeModal(); renderAll();
+  toast('已删除');
+});
+$('btnCloseModal').addEventListener('click', closeModal);
+$('btnCloseHead').addEventListener('click', closeModal);
+modalBack.addEventListener('click', e => { if(e.target === modalBack) closeModal(); });
+
+/* ================= 新建投递 ================= */
+const addBack = $('addBack');
+function openAdd(){
+  $('addName').value = '';
+  $('addPos').value = '';
+  addBack.hidden = false;
+  document.body.classList.add('noscroll');
+  setTimeout(() => $('addName').focus(), 0);
+}
+function closeAdd(){
+  addBack.hidden = true;
+  document.body.classList.remove('noscroll');
+}
+function createCompany(){
+  const name = $('addName').value.trim();
+  if(!name){ toast('请填写公司名称'); return; }
+  const c = normalize({name: name, position: $('addPos').value.trim()});
+  data.companies.push(c);
+  save(); closeAdd(); renderAll();
+  openCompany(c.id);
+  toast('已创建，补充信息会自动保存');
+}
+$('btnCreate').addEventListener('click', createCompany);
+$('addName').addEventListener('keydown', e => { if(e.key === 'Enter') createCompany(); });
+$('addPos').addEventListener('keydown', e => { if(e.key === 'Enter') createCompany(); });
+addBack.addEventListener('click', e => { if(e.target === addBack) closeAdd(); });
+
+/* ================= 全局按钮 ================= */
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]');
+  if(!a) return;
+  const act = a.dataset.act;
+  if(act === 'add') openAdd();
+  else if(act === 'sample') loadSample();
+  else if(act === 'close-add') closeAdd();
+});
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  if(!addBack.hidden) closeAdd();
+  else if(!modalBack.hidden) closeModal();
+});
+
+/* ================= 数据管理 ================= */
+function renderDataStats(){
+  const cs = data.companies;
+  const offers = cs.filter(c => c.status === 'offer').length;
+  const rejected = cs.filter(c => c.status === 'rejected').length;
+  $('dataStats').textContent = '当前共 ' + cs.length + ' 家公司 · Offer ' + offers + ' · 已挂 ' + rejected;
+}
+$('btnExport').addEventListener('click', () => {
+  if(data.companies.length === 0){ toast('还没有数据可导出'); return; }
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '秋招备份-' + dstr(0) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('已导出备份文件');
+});
+$('importBtn').addEventListener('click', () => $('importFile').click());
+$('importFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const d = JSON.parse(reader.result);
+      if(!d || !Array.isArray(d.companies)) throw new Error('bad');
+      const arr = d.companies.map(normalize).filter(Boolean);
+      if(!confirm('导入 ' + arr.length + ' 家公司，将覆盖当前全部数据，继续？')) return;
+      data = {companies: arr, offers: [], practice: []};
+      if(Array.isArray(d.offers)) data.offers = d.offers.map(o => {
+        const hf = Number(o.hfRate);
+        return {id: o.id || uid(), company: String(o.company || ''), position: String(o.position || ''),
+          base: Math.max(0, Number(o.base) || 0), months: Number(o.months) > 0 ? Number(o.months) : 12,
+          signing: Math.max(0, Number(o.signing) || 0), allowance: Math.max(0, Number(o.allowance) || 0),
+          stock: Math.max(0, Number(o.stock) || 0), deadline: String(o.deadline || '').slice(0, 10),
+          hfRate: isFinite(hf) ? Math.min(24, Math.max(0, hf)) : 12};
+      });
+      if(Array.isArray(d.practice)) data.practice = d.practice.filter(r => r && r.date).map(r => ({
+        date: String(r.date).slice(0, 10), easy: Math.max(0, Number(r.easy) || 0),
+        mid: Math.max(0, Number(r.mid) || 0), hard: Math.max(0, Number(r.hard) || 0)}));
+      if(Array.isArray(d.skills)) data.skills = d.skills.filter(s => s && s.name).map(s => ({
+        id: s.id || uid(), name: String(s.name),
+        mastery: Math.min(5, Math.max(0, Number(s.mastery) || 0)), createdAt: s.createdAt || Date.now()}));
+      if(Array.isArray(d.resumeVersions)) data.resumeVersions = d.resumeVersions.filter(v => v && String(v).trim()).map(v => String(v).trim());
+      migrateResumeVersions();
+      save(); closeModal(); renderAll();
+      toast('导入成功');
+    }catch(err){ toast('文件格式不对，导入失败'); }
+  };
+  reader.readAsText(f);
+});
+$('btnClear').addEventListener('click', () => {
+  if(data.companies.length === 0){ toast('当前没有数据'); return; }
+  if(!confirm('确定清空全部数据？此操作不可恢复！')) return;
+  data = {companies: [], offers: [], practice: [], skills: [], resumeVersions: []};
+  save(); closeModal(); renderAll();
+  toast('已清空');
+});
+
+function loadSample(){
+  if(data.companies.length && !confirm('将追加 6 家示例公司、刷题打卡、技能和 Offer 示例，继续？')) return;
+  [
+    {name:'字节跳动', position:'后端开发工程师', status:'applied', deadline:dstr(3),
+     jdKeywords:'Go MySQL Redis 微服务', resumeVersion:'后端通用版 v3',
+     events:[{type:'笔试', time:tstr(1,'19:00'), note:'牛客平台，需要开摄像头'}]},
+    {name:'阿里巴巴', position:'Java 研发', status:'interview',
+     events:[{type:'面试', time:tstr(2,'14:00'), note:'二面 · 视频面试'}],
+     rounds:[{round:'一面', date:dstr(-3), rating:4,
+       questions:'HashMap 底层原理；线程池核心参数；项目里的幂等怎么做的',
+       takeaways:'项目细节要准备好数字，准备两个 STAR 故事'}]},
+    {name:'腾讯', position:'客户端开发', status:'written',
+     events:[{type:'笔试', time:tstr(-1,'19:00'), note:''}]},
+    {name:'美团', position:'后端开发', status:'offer', notes:'base 北京，等意向书'},
+    {name:'网易', position:'前端开发', status:'rejected',
+     rounds:[{round:'一面', date:dstr(-7), rating:2,
+       questions:'事件循环；手写 Promise.all',
+       takeaways:'JS 基础还要刷，手写题每天一道'}]},
+    {name:'拼多多', position:'服务端研发', status:'wishlist', deadline:dstr(10),
+     notes:'听说强度大，慎重考虑'}
+  ].forEach(o => {
+    const c = normalize(o);
+    if(c) data.companies.push(c);
+  });
+  [[0,2,1,0],[1,1,2,1],[2,0,3,0],[4,2,0,0]].forEach(a =>
+    data.practice.push({date: dstr(a[0]), easy: a[1], mid: a[2], hard: a[3]}));
+  [['Redis',2],['MySQL',3],['操作系统',3],['网络基础',1],['系统设计',0]].forEach(a =>
+    data.skills.push({id: uid(), name: a[0], mastery: a[1], createdAt: Date.now()}));
+  data.offers.push({id: uid(), company: '美团', position: '后端开发', base: 21000,
+    months: 15.5, signing: 10000, allowance: 0, stock: 0, hfRate: 12});
+  data.offers.push({id: uid(), company: '阿里巴巴', position: 'Java 研发', base: 25000,
+    months: 16, signing: 6000, allowance: 0, stock: 30000, hfRate: 12});
+  save(); closeModal(); renderAll();
+  switchView('board');
+  toast('已载入示例数据');
+}
+
+/* ================= Toast ================= */
+let toastTimer = null;
+function toast(msg){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+/* ================= 刷题打卡 ================= */
+function pracSum(days){
+  let s = 0;
+  for(let off = 0; off < days; off++){
+    const r = (data.practice || []).find(x => x.date === dstr(off));
+    if(r) s += r.easy + r.mid + r.hard;
+  }
+  return s;
+}
+function pracOn(ds){ return (data.practice || []).find(r => r.date === ds); }
+function renderPractice(){
+  data.practice = data.practice || [];
+  const recs = data.practice.slice().sort((a,b) => b.date.localeCompare(a.date));
+  const total = recs.reduce((s,r) => s + r.easy + r.mid + r.hard, 0);
+  let streak = 0, off = pracOn(dstr(0)) && pracOn(dstr(0)).easy + pracOn(dstr(0)).mid + pracOn(dstr(0)).hard > 0 ? 0 : 1;
+  while(true){
+    const r = pracOn(dstr(off));
+    if(r && r.easy + r.mid + r.hard > 0){ streak++; off++; } else break;
+  }
+  $('pracStats').innerHTML =
+    '<div class="stat"><div class="n">' + total + '</div><div class="l">累计刷题</div></div>' +
+    '<div class="stat"><div class="n green">' + streak + '</div><div class="l">连续打卡（天）</div></div>' +
+    '<div class="stat"><div class="n">' + pracSum(7) + '</div><div class="l">本周题数</div></div>' +
+    '<div class="stat"><div class="n">' + pracSum(30) + '</div><div class="l">近 30 天题数</div></div>';
+  $('pracTodayTitle').textContent = '📅 今日打卡 · ' + fmtDate(dstr(0));
+  const t = pracOn(dstr(0));
+  if(t){
+    $('pEasy').value = t.easy; $('pMid').value = t.mid; $('pHard').value = t.hard;
+    $('btnPractice').textContent = '更新今日打卡';
+  }else{
+    $('pEasy').value = 0; $('pMid').value = 0; $('pHard').value = 0;
+    $('btnPractice').textContent = '保存今日打卡';
+  }
+  let cells = '';
+  for(let i = 27; i >= 0; i--){
+    const ds = dstr(i), r = pracOn(ds);
+    const n = r ? r.easy + r.mid + r.hard : 0;
+    const lv = n === 0 ? '' : n < 3 ? 'l1' : n < 6 ? 'l2' : 'l3';
+    cells += '<div class="hcell ' + lv + '" title="' + fmtDate(ds) + ' · ' + n + ' 题"></div>';
+  }
+  $('heatmap').innerHTML = cells;
+  const shown = recs.slice(0, 12);
+  $('pracHistory').innerHTML = shown.length
+    ? '<div class="ph-title">历史记录</div>' + shown.map(r =>
+      '<div class="evt-row"><span class="chip chip-g">' + fmtDate(r.date) + '</span>' +
+      '<div class="main muted">简 ' + r.easy + ' · 中 ' + r.mid + ' · 难 ' + r.hard + '</div>' +
+      '<button class="del" data-delprac="' + r.date + '">删除</button></div>').join('')
+    : '<div class="muted">还没有打卡记录</div>';
+}
+$('btnPractice').addEventListener('click', () => {
+  const v = k => Math.max(0, Math.floor(Number($(k).value) || 0));
+  const rec = {date: dstr(0), easy: v('pEasy'), mid: v('pMid'), hard: v('pHard')};
+  const i = data.practice.findIndex(r => r.date === rec.date);
+  if(i >= 0) data.practice[i] = rec; else data.practice.push(rec);
+  save(); renderPractice();
+  toast('打卡成功 · 今日共 ' + (rec.easy + rec.mid + rec.hard) + ' 题');
+});
+$('pracHistory').addEventListener('click', e => {
+  const b = e.target.closest('[data-delprac]');
+  if(!b) return;
+  if(!confirm('删除 ' + fmtDate(b.dataset.delprac) + ' 的打卡记录？')) return;
+  data.practice = data.practice.filter(r => r.date !== b.dataset.delprac);
+  save(); renderPractice();
+});
+
+/* ================= 技能题库 ================= */
+const MASTERY = [
+  {v:0, label:'未评估', cls:'gray'},
+  {v:1, label:'薄弱',  cls:'red'},
+  {v:2, label:'一般',  cls:'amber'},
+  {v:3, label:'熟悉',  cls:'blue'},
+  {v:4, label:'扎实',  cls:'green'},
+  {v:5, label:'精通',  cls:'green'},
+];
+function masteryBadge(m){
+  const mst = MASTERY[Math.min(5, Math.max(0, Number(m) || 0))] || MASTERY[0];
+  return '<span class="badge ' + mst.cls + '">' + mst.label + '</span>';
+}
+function weakSkills(){
+  return (data.skills || []).filter(s => s.mastery >= 1 && s.mastery <= 2).length;
+}
+function qMatches(text, name){
+  if(!text || !name) return false;
+  if(/^[\x00-\x7F]+$/.test(name))
+    return new RegExp('\\b' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(text);
+  return text.toLowerCase().includes(name.toLowerCase());
+}
+function collectQuestions(){
+  const out = [];
+  data.companies.forEach(c => (c.rounds || []).forEach(r => {
+    String(r.questions || '').split(/[；;\n]+/).map(s => s.trim()).filter(Boolean).forEach(q => {
+      out.push({companyId: c.id, company: c.name, round: r.round, date: r.date, text: q});
+    });
+  }));
+  return out.sort((a,b) => b.date.localeCompare(a.date));
+}
+let expandedSkills = new Set();
+function renderSkills(){
+  data.skills = data.skills || [];
+  const qs = collectQuestions();
+  const counts = {};
+  data.skills.forEach(s => counts[s.id] = 0);
+  qs.forEach(q => data.skills.forEach(s => { if(qMatches(q.text, s.name)) counts[s.id]++; }));
+  const weak = weakSkills();
+  const uneval = data.skills.filter(s => s.mastery === 0).length;
+  const classified = data.skills.filter(s => counts[s.id] > 0).length;
+  $('skStats').innerHTML =
+    '<div class="stat"><div class="n">' + data.skills.length + '</div><div class="l">技能总数</div></div>' +
+    '<div class="stat"><div class="n' + (weak ? ' red' : '') + '">' + weak + '</div><div class="l">薄弱技能</div></div>' +
+    '<div class="stat"><div class="n">' + uneval + '</div><div class="l">未评估</div></div>' +
+    '<div class="stat"><div class="n">' + classified + '</div><div class="l">有面试题记录的技能</div></div>';
+  const skKey = m => { m = Number(m) || 0; return (m >= 1 && m <= 2) ? 0 : (m === 0 ? 1 : m); };
+  const list = data.skills.slice().sort((a,b) => {
+    const ka = skKey(a.mastery), kb = skKey(b.mastery);
+    if(ka !== kb) return ka - kb;
+    if(counts[b.id] !== counts[a.id]) return counts[b.id] - counts[a.id];
+    return a.name.localeCompare(b.name, 'zh');
+  });
+  $('skillsList').innerHTML = list.length === 0
+    ? '<div class="muted" style="padding:8px 0">还没有技能：手动添加，或点上方「从 JD 关键词导入」。</div>'
+    : list.map(s => {
+      const match = qs.filter(q => qMatches(q.text, s.name));
+      const open = expandedSkills.has(s.id);
+      const body = open
+        ? '<div class="sk-body">' + (match.length
+          ? match.map(q =>
+            '<div class="evt-row"><span class="chip chip-g">' + esc(q.round) + '</span>' +
+            '<div class="main"><div class="t1">' + esc(q.text) + '</div>' +
+            '<div class="t2"><button class="linklike" data-open-company="' + q.companyId + '">' + esc(q.company) + '</button>' +
+            ' · ' + fmtDate(q.date) + '</div></div></div>').join('')
+          : '<div class="muted" style="padding:6px 0">暂无匹配的面试题——在各公司复盘里记到包含「' + esc(s.name) + '」的问题后会自动出现在这里</div>') + '</div>'
+        : '';
+      return '<div class="skill-card">' +
+        '<div class="sk-head" data-toggle="' + s.id + '">' +
+        masteryBadge(s.mastery) +
+        '<span class="sk-name">' + esc(s.name) + '</span>' +
+        (counts[s.id] ? '<span class="chip">' + counts[s.id] + ' 题</span>' : '') +
+        '<select class="sk-select" data-mastery="' + s.id + '">' +
+        MASTERY.map(m => '<option value="' + m.v + '"' + (Number(s.mastery) === m.v ? ' selected' : '') + '>' + m.label + '</option>').join('') +
+        '</select>' +
+        '<button class="del" data-delskill="' + s.id + '">删除</button>' +
+        '</div>' + body + '</div>';
+    }).join('');
+}
+function addSkill(){
+  const name = $('skName').value.trim();
+  if(!name){ toast('请填写技能名'); return; }
+  data.skills = data.skills || [];
+  if(data.skills.some(s => s.name.toLowerCase() === name.toLowerCase())){ toast('这个技能已经存在'); return; }
+  data.skills.push({id: uid(), name: name, mastery: Number($('skMastery').value) || 0, createdAt: Date.now()});
+  save(); renderSkills();
+  $('skName').value = '';
+  toast('已添加技能');
+}
+$('btnAddSkill').addEventListener('click', addSkill);
+$('skName').addEventListener('keydown', e => { if(e.key === 'Enter') addSkill(); });
+$('btnSkillFromJD').addEventListener('click', () => {
+  data.skills = data.skills || [];
+  const existing = new Set(data.skills.map(s => s.name.toLowerCase()));
+  const tokens = new Set();
+  data.companies.forEach(c => String(c.jdKeywords || '').split(/[\s,，、;；/|·+]+/).forEach(t => {
+    t = t.trim();
+    if(t.length >= 2 && !existing.has(t.toLowerCase())) tokens.add(t);
+  }));
+  if(tokens.size === 0){ toast('JD 关键词里没有可导入的新技能'); return; }
+  tokens.forEach(t => data.skills.push({id: uid(), name: t, mastery: 0, createdAt: Date.now()}));
+  save(); renderSkills();
+  toast('已导入 ' + tokens.size + ' 个技能（未评估）');
+});
+$('skillsList').addEventListener('click', e => {
+  const del = e.target.closest('[data-delskill]');
+  if(del){
+    const s = data.skills.find(x => x.id === del.dataset.delskill);
+    if(s && confirm('删除技能「' + s.name + '」？相关面试题记录不会丢失。')){
+      data.skills = data.skills.filter(x => x.id !== s.id);
+      save(); renderSkills();
+    }
+    return;
+  }
+  const oc = e.target.closest('[data-open-company]');
+  if(oc){ openCompany(oc.dataset.openCompany); return; }
+  const tog = e.target.closest('[data-toggle]');
+  if(tog && !e.target.closest('select,button,input,a')){
+    const id = tog.dataset.toggle;
+    if(expandedSkills.has(id)) expandedSkills.delete(id); else expandedSkills.add(id);
+    renderSkills();
+  }
+});
+$('skillsList').addEventListener('change', e => {
+  const sel = e.target.closest('select[data-mastery]');
+  if(!sel) return;
+  const s = (data.skills || []).find(x => x.id === sel.dataset.mastery);
+  if(!s) return;
+  s.mastery = Number(sel.value) || 0;
+  save(); renderSkills();
+});
+
+/* ================= Offer 对比 ================= */
+function computeOffer(o){
+  const year = Math.round((o.base || 0) * (o.months || 0) + (o.allowance || 0) * 12
+    + (o.stock || 0) + (o.base || 0) * 12 * (o.hfRate || 0) / 100);
+  /* 税后估算：五险一金个人部分约 10.5%+公积金%，个税按年度综合所得税率表（累计预扣口径、无专项附加扣除） */
+  const gross = (o.base || 0) * (o.months || 0) + (o.allowance || 0) * 12;
+  const social = gross * (0.105 + (o.hfRate || 0) / 100);
+  const taxable = Math.max(0, gross - social - 60000);
+  const brackets = [[36000, .03, 0], [144000, .10, 2520], [300000, .20, 16920],
+    [420000, .25, 31920], [660000, .30, 52920], [960000, .35, 85920], [Infinity, .45, 181920]];
+  let tax = 0;
+  for(const b of brackets){ if(taxable <= b[0]){ tax = taxable * b[1] - b[2]; break; } }
+  const takehome = Math.max(0, Math.round((gross - social - tax) / 12));
+  return {year: year, first: year + (o.signing || 0), takehome: takehome};
+}
+function money(n){ return '¥' + Math.round(n).toLocaleString('zh-CN'); }
+function offerRowHTML(o, best){
+  const c = computeOffer(o);
+  return '<tr data-id="' + o.id + '"' + (best ? ' class="best"' : '') + '>' +
+    '<td><input class="oin txt" data-f="company" value="' + esc(o.company) + '" placeholder="公司"></td>' +
+    '<td><input class="oin txt" data-f="position" value="' + esc(o.position) + '" placeholder="岗位"></td>' +
+    '<td><input type="number" class="oin num" data-f="base" value="' + (o.base || '') + '"></td>' +
+    '<td><input type="number" class="oin num sm" data-f="months" value="' + (o.months || '') + '"></td>' +
+    '<td><input type="number" class="oin num" data-f="signing" value="' + (o.signing || '') + '"></td>' +
+    '<td><input type="number" class="oin num" data-f="allowance" value="' + (o.allowance || '') + '"></td>' +
+    '<td><input type="number" class="oin num" data-f="stock" value="' + (o.stock || '') + '"></td>' +
+    '<td><input type="number" class="oin num sm" data-f="hfRate" value="' + (o.hfRate || '') + '"></td>' +
+    '<td><input type="date" class="oin dt" data-f="deadline" value="' + esc(o.deadline || '') + '"></td>' +
+    '<td class="calc">' + money(c.year) + '</td>' +
+    '<td class="calc"><b>' + money(c.first) + '</b></td>' +
+    '<td class="calc" style="color:#059669"><b>' + money(c.takehome) + '</b></td>' +
+    '<td><button class="del" data-deloffer="' + o.id + '">删除</button></td></tr>';
+}
+function bestOffer(){
+  let bestId = null, bestFirst = -1;
+  (data.offers || []).filter(Boolean).forEach(o => {
+    const f = computeOffer(o).first;
+    if(f > bestFirst){ bestFirst = f; bestId = o.id; }
+  });
+  return {bestId: bestId, bestFirst: bestFirst};
+}
+function renderOffers(){
+  data.offers = (data.offers || []).filter(Boolean);
+  if(data.offers.length === 0){
+    $('offerBody').innerHTML = '<tr><td colspan="13" style="padding:18px" class="muted">还没有 Offer：点右上角「＋ 添加一行」手动录入，或「从看板拉取 Offer 公司」。</td></tr>';
+    $('offerBest').hidden = true;
+    return;
+  }
+  const b = bestOffer();
+  $('offerBody').innerHTML = data.offers.map(o => offerRowHTML(o, o.id === b.bestId)).join('');
+  const bo = data.offers.find(o => o.id === b.bestId);
+  $('offerBest').hidden = false;
+  $('offerBest').textContent = '🏆 目前最优：' + (bo.company || '未命名') + ' · 首年 ' + money(b.bestFirst) + ' · 月到手约 ' + money(computeOffer(bo).takehome);
+}
+$('offerBody').addEventListener('input', e => {
+  const inp = e.target.closest('input[data-f]');
+  if(!inp) return;
+  const tr = inp.closest('tr[data-id]');
+  const o = (data.offers || []).find(x => x.id === tr.dataset.id);
+  if(!o) return;
+  const f = inp.dataset.f;
+  if(inp.type === 'number'){
+    let n = parseFloat(inp.value);
+    o[f] = isFinite(n) && n > 0 ? n : 0;
+  }else{
+    o[f] = inp.value;
+  }
+  save();
+  const c = computeOffer(o);
+  tr.children[8].textContent = money(c.year);
+  tr.children[9].innerHTML = '<b>' + money(c.first) + '</b>';
+  tr.children[10].textContent = money(c.takehome);
+  const b = bestOffer();
+  document.querySelectorAll('#offerBody tr').forEach(r =>
+    r.classList.toggle('best', r.dataset.id === b.bestId));
+  const bo = data.offers.find(x => x.id === b.bestId);
+  $('offerBest').hidden = false;
+  $('offerBest').textContent = '🏆 目前最优：' + (bo.company || '未命名') + ' · 首年 ' + money(b.bestFirst) + ' · 月到手约 ' + money(computeOffer(bo).takehome);
+});
+$('offerBody').addEventListener('click', e => {
+  const btn = e.target.closest('[data-deloffer]');
+  if(!btn) return;
+  const o = (data.offers || []).find(x => x.id === btn.dataset.deloffer);
+  if(!confirm('删除「' + (o ? o.company : '') + '」这一行？')) return;
+  data.offers = data.offers.filter(x => x.id !== btn.dataset.deloffer);
+  save(); renderOffers();
+});
+$('btnAddOffer').addEventListener('click', () => {
+  data.offers.push({id: uid(), company: '', position: '', base: 0, months: 12,
+    signing: 0, allowance: 0, stock: 0, hfRate: 12, deadline: ''});
+  save(); renderOffers();
+});
+$('btnPullOffers').addEventListener('click', () => {
+  const names = new Set((data.offers || []).map(o => (o.company || '').trim()));
+  const src = data.companies.filter(c => c.status === 'offer' && !names.has(c.name));
+  if(src.length === 0){ toast('看板里没有可拉取的 Offer 公司'); return; }
+  src.forEach(c => data.offers.push({id: uid(), company: c.name, position: c.position || '',
+    base: 0, months: 12, signing: 0, allowance: 0, stock: 0, hfRate: 12, deadline: ''}));
+  save(); renderOffers();
+  toast('已拉取 ' + src.length + ' 家');
+});
+
+/* ================= 云端同步（Supabase，纯 fetch 实现） ================= */
+const KEY_CLOUD = 'qiuzhong-tracker-cloud';
+const KEY_AUTH  = 'qiuzhong-tracker-auth';
+const KEY_SYNCM = 'qiuzhong-tracker-syncm';
+/* 出厂预置：云端项目配置（网页版不含任何登录信息，用户自行登录） */
+const BAKED_CLOUD = {url: 'https://siwsnmpoyauqvnkyrujf.supabase.co', key: 'sb_publishable_bkMFiukDL3AsWPs1dmeWpQ_2GQmHNxW'};
+const BAKED_SESSION = null;
+const BAKED_PASSWORD = null;
+const SYNC_SQL = [
+  'create table if not exists public.sync_data (',
+  '  user_id uuid primary key references auth.users(id) on delete cascade,',
+  "  payload jsonb not null default '{}'::jsonb,",
+  '  updated_at timestamptz not null default now()',
+  ');',
+  'alter table public.sync_data enable row level security;',
+  'drop policy if exists "sync_select" on public.sync_data;',
+  'create policy "sync_select" on public.sync_data for select using (auth.uid() = user_id);',
+  'drop policy if exists "sync_insert" on public.sync_data;',
+  'create policy "sync_insert" on public.sync_data for insert with check (auth.uid() = user_id);',
+  'drop policy if exists "sync_update" on public.sync_data;',
+  'create policy "sync_update" on public.sync_data for update using (auth.uid() = user_id) with check (auth.uid() = user_id);'
+].join('\n');
+function cloudCfg(){
+  try{
+    const c = JSON.parse(localStorage.getItem(KEY_CLOUD) || 'null') || BAKED_CLOUD;
+    if(c && /^https?:\/\//.test(c.url || '') && (c.key || '').length > 20)
+      return {url: c.url.replace(/\/+$/, ''), key: c.key};
+  }catch(e){}
+  return null;
+}
+function getSession(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY_AUTH) || 'null');
+    return (s && s.access_token) ? s : null;
+  }catch(e){ return null; }
+}
+function setSession(j, emailFallback){
+  const exp = j.expires_at ? j.expires_at * 1000 : Date.now() + (j.expires_in || 3600) * 1000;
+  localStorage.setItem(KEY_AUTH, JSON.stringify({
+    access_token: j.access_token, refresh_token: j.refresh_token, expiresAt: exp,
+    email: (j.user && j.user.email) || emailFallback || '',
+    userId: (j.user && j.user.id) || ''
+  }));
+}
+function clearSession(){ localStorage.removeItem(KEY_AUTH); }
+function getSyncM(){ try{ return JSON.parse(localStorage.getItem(KEY_SYNCM) || '{}') || {}; }catch(e){ return {}; } }
+function saveSyncM(m){ localStorage.setItem(KEY_SYNCM, JSON.stringify(m)); }
+let noPush = false, pushTimer = null, lastErrToast = 0, cfgEditing = false;
+function queueCloudPush(){
+  if(noPush || !cloudCfg() || !getSession()) return;
+  if(getSyncM().auto === false) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => cloudPush(true).catch(e => {
+    const sk = getSyncM();
+    sk.lastError = e.message;
+    saveSyncM(sk); renderSyncPanel();
+    const now = Date.now();
+    if(now - lastErrToast > 60000){ lastErrToast = now; toast('云端自动上传失败：' + e.message); }
+  }), 5000);
+}
+async function bakedRelogin(cfg){
+  if(typeof BAKED_PASSWORD === 'undefined' || !BAKED_PASSWORD) return null;
+  const s = getSession();
+  const email = (s && s.email) || (typeof BAKED_SESSION !== 'undefined' && BAKED_SESSION.email) || '';
+  if(!email) return null;
+  try{
+    const res = await fetch(cfg.url + '/auth/v1/token?grant_type=password', {
+      method: 'POST', headers: {'apikey': cfg.key, 'Content-Type': 'application/json'},
+      body: JSON.stringify({email: email, password: BAKED_PASSWORD})
+    });
+    const j = await res.json();
+    return (res.ok && j.access_token) ? j : null;
+  }catch(e){ return null; }
+}
+async function apiHeaders(){
+  const cfg = cloudCfg(), s = getSession();
+  if(!cfg) throw new Error('未配置云端');
+  if(!s) throw new Error('未登录');
+  if(!s.refresh_token || (s.expiresAt && s.expiresAt < Date.now() + 60000)){
+    let j = null;
+    try{
+      const res = await fetch(cfg.url + '/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST', headers: {'apikey': cfg.key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({refresh_token: s.refresh_token})
+      });
+      j = await res.json();
+    }catch(e){ j = null; }
+    if(!j || !j.access_token){
+      j = await bakedRelogin(cfg);
+      if(!j){
+        clearSession(); renderSyncPanel();
+        throw new Error('登录已过期，请重新登录');
+      }
+    }
+    setSession(j, s.email);
+  }
+  const s2 = getSession(), cfg2 = cloudCfg();
+  return {headers: {'apikey': cfg2.key, 'Authorization': 'Bearer ' + s2.access_token, 'Content-Type': 'application/json'},
+    userId: s2.userId, url: cfg2.url};
+}
+function normalizeData(src){
+  const d = src || {};
+  return {
+    companies: (Array.isArray(d.companies) ? d.companies : []).map(normalize).filter(Boolean),
+    offers: Array.isArray(d.offers) ? d.offers.map(o => ({
+      id: o.id || uid(), company: String(o.company || ''), position: String(o.position || ''),
+      base: Math.max(0, Number(o.base) || 0), months: Number(o.months) > 0 ? Number(o.months) : 12,
+      signing: Math.max(0, Number(o.signing) || 0), allowance: Math.max(0, Number(o.allowance) || 0),
+      stock: Math.max(0, Number(o.stock) || 0),
+      deadline: String(o.deadline || '').slice(0, 10),
+      hfRate: isFinite(Number(o.hfRate)) ? Math.min(24, Math.max(0, Number(o.hfRate))) : 12
+    })) : [],
+    practice: Array.isArray(d.practice) ? d.practice.filter(r => r && r.date).map(r => ({
+      date: String(r.date).slice(0, 10), easy: Math.max(0, Number(r.easy) || 0),
+      mid: Math.max(0, Number(r.mid) || 0), hard: Math.max(0, Number(r.hard) || 0)})) : [],
+    skills: Array.isArray(d.skills) ? d.skills.filter(s => s && s.name).map(s => ({
+      id: s.id || uid(), name: String(s.name),
+      mastery: Math.min(5, Math.max(0, Number(s.mastery) || 0)), createdAt: s.createdAt || Date.now()})) : [],
+    resumeVersions: Array.isArray(d.resumeVersions) ? d.resumeVersions.filter(v => v && String(v).trim()).map(v => String(v).trim()) : [],
+    meta: (d.meta && typeof d.meta === 'object') ? d.meta : {}
+  };
+}
+function migrateResumeVersions(){
+  data.resumeVersions = data.resumeVersions || [];
+  data.companies.forEach(c => {
+    if(c.resumeVersion && data.resumeVersions.indexOf(c.resumeVersion) < 0) data.resumeVersions.push(c.resumeVersion);
+  });
+}
+async function cloudPush(silent){
+  const h = await apiHeaders();
+  const res = await fetch(h.url + '/rest/v1/sync_data', {
+    method: 'POST',
+    headers: Object.assign({'Prefer': 'resolution=merge-duplicates,return=representation'}, h.headers),
+    body: JSON.stringify([{user_id: h.userId, payload: data, updated_at: new Date().toISOString()}])
+  });
+  if(!res.ok){
+    const t = await res.text();
+    throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 120));
+  }
+  const rows = await res.json();
+  if(!data.meta || typeof data.meta !== 'object') data.meta = {};
+  data.meta.ownerId = h.userId;
+  localStorage.setItem(KEY, JSON.stringify(data));
+  const sk = getSyncM();
+  sk.lastPushAt = (data.meta && data.meta.updatedAt) || Date.now();
+  if(rows && rows[0] && rows[0].updated_at) sk.lastCloudUpdatedAt = rows[0].updated_at;
+  sk.lastError = '';
+  saveSyncM(sk);
+  renderSyncPanel();
+  if(!silent) toast('已上传到云端');
+}
+async function cloudPull(quiet){
+  const h = await apiHeaders();
+  const res = await fetch(h.url + '/rest/v1/sync_data?select=payload,updated_at&user_id=eq.' + h.userId, {headers: h.headers});
+  if(!res.ok){
+    const t = await res.text();
+    throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 120));
+  }
+  const rows = await res.json();
+  if(!rows || !rows.length){
+    if(!quiet) toast('云端还没有数据，先上传一次');
+    return 'empty';
+  }
+  const cloud = {payload: rows[0].payload, updatedAt: rows[0].updated_at};
+  const sk = getSyncM();
+  const isEmptyLocal = !data.companies.length && !(data.offers || []).length
+    && !(data.practice || []).length && !(data.skills || []).length;
+  const localDirty = !isEmptyLocal && ((data.meta && data.meta.updatedAt) || 0) !== (sk.lastPushAt === undefined ? -1 : sk.lastPushAt);
+  const cloudChanged = cloud.updatedAt !== sk.lastCloudUpdatedAt;
+  if(localDirty && cloudChanged){
+    if(quiet){
+      toast('云端有更新，本地也有修改——请到「数据」页选择上传或下载');
+      return 'conflict';
+    }
+    if(!confirm('本地有未上传的修改，云端也有别的修改。\n\n确定 = 用云端覆盖本地（本地未上传的修改会丢失）\n取消 = 不下载，可先点「上传到云端」用本地覆盖')) return 'conflict';
+  }else if(!cloudChanged){
+    if(!quiet) toast('云端没有更新的数据');
+    return 'unchanged';
+  }
+  noPush = true; clearTimeout(pushTimer);
+  data = normalizeData(cloud.payload);
+  data.meta.ownerId = h.userId;
+  migrateResumeVersions();
+  save();
+  const sk2 = getSyncM();
+  sk2.lastCloudUpdatedAt = cloud.updatedAt;
+  sk2.lastPushAt = data.meta.updatedAt;
+  sk2.lastPullAt = Date.now();
+  sk2.lastError = '';
+  saveSyncM(sk2);
+  noPush = false;
+  closeModal(); renderAll();
+  toast(quiet ? '已自动同步云端更新' : '已从云端下载');
+  return 'downloaded';
+}
+function renderSyncPanel(){
+  const el = $('syncPanel');
+  if(!el) return;
+  const cfg = cloudCfg(), s = getSession(), sk = getSyncM();
+  const ab = $('btnAccount');
+  if(ab) ab.textContent = s ? '👤 ' + (((s.email || '').split('@')[0]) || '账号') : '👤 登录';
+  const fmtT = ts => ts ? new Date(ts).toLocaleString('zh-CN', {month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : '—';
+  $('syncStatus').textContent = (!cfg ? '未配置' : (!s ? '已配置 · 未登录' : '已登录 ' + (s.email || ''))) + (sk.lastError ? ' · 上次同步失败' : '');
+  let html = '';
+  if(!cfg || cfgEditing){
+    html += '<div class="grid2">' +
+      '<div class="field"><label>Supabase 项目地址</label><input id="syncUrl" placeholder="https://xxxx.supabase.co" value="' + esc(cfg ? cfg.url : '') + '"></div>' +
+      '<div class="field"><label>anon public key</label><input id="syncKey" type="password" placeholder="eyJhbGciOi…（很长的一串）" value="' + esc(cfg ? cfg.key : '') + '"></div>' +
+      '</div><div class="datarow"><button class="btn primary" data-sync-act="save-cfg">保存配置</button>' +
+      (cfg ? '<button class="btn" data-sync-act="clear-cfg">断开并清除</button>' : '') + '</div>';
+  }else{
+    html += '<div class="datarow"><span class="muted">项目：' + esc(cfg.url.replace(/^https?:\/\//, '')) + '</span>' +
+      '<button class="btn sm" data-sync-act="edit-cfg">修改配置</button></div>';
+  }
+  html += '<details class="setup"><summary>设置步骤（第一次使用看这里，约 3 分钟）</summary><div class="setup-body">' +
+    '<p>1. 打开 <b>supabase.com</b> 注册并登录，点 <b>New project</b> 建一个免费项目（名称随意，区域选 Singapore 离国内近）。</p>' +
+    '<p>2. 左侧菜单 <b>SQL Editor</b>，粘贴下面这段 SQL 并运行（每个项目只需一次）：</p>' +
+    '<textarea class="sqlbox" readonly rows="7">' + esc(SYNC_SQL) + '</textarea>' +
+    '<div class="datarow"><button class="btn sm" data-sync-act="copy-sql">复制 SQL</button></div>' +
+    '<p>3. 左侧 <b>Project Settings → API</b>，把 <b>Project URL</b> 和 <b>anon public key</b> 填到上面并保存，然后登录。</p>' +
+    '<p class="muted">数据存在你自己的 Supabase 项目里，行级安全策略保证只有你登录后能读写自己的数据。断网时一切功能照常，联网后自动续传。</p>' +
+    '</div></details>';
+  if(cfg && !s){
+    html += '<div class="grid2" style="margin-top:8px">' +
+      '<div class="field"><label>邮箱</label><input id="syncEmail" type="email" autocomplete="username"></div>' +
+      '<div class="field"><label>密码</label><input id="syncPwd" type="password" autocomplete="current-password"></div>' +
+      '</div><div class="datarow"><button class="btn primary" data-sync-act="login">登录</button>' +
+      '<button class="btn" data-sync-act="signup">注册新账号</button></div>';
+  }
+  if(cfg && s){
+    html += '<div class="datarow">' +
+      '<button class="btn primary" data-sync-act="push">⬆ 上传到云端</button>' +
+      '<button class="btn" data-sync-act="pull">⬇ 从云端下载</button>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" id="syncAuto" style="width:auto" ' + (sk.auto !== false ? 'checked' : '') + '>改动后自动上传</label>' +
+      '<button class="btn" data-sync-act="logout">退出登录</button></div>' +
+      '<div class="muted" style="margin-top:4px">上次上传：' + fmtT(sk.lastPushAt) + ' · 上次下载：' + fmtT(sk.lastPullAt) +
+      (sk.lastError ? '<br><span style="color:#b91c1c">上次同步失败：' + esc(sk.lastError) + '</span>' : '') + '</div>';
+  }
+  el.innerHTML = html;
+}
+async function syncAction(act){
+  if(act === 'save-cfg'){
+    const u = $('syncUrl').value.trim().replace(/\/+$/, ''), k = $('syncKey').value.trim();
+    if(!/^https?:\/\//.test(u)){ toast('项目地址要以 https:// 开头'); return; }
+    if(k.length < 20){ toast('anon key 不对，请从 Project Settings → API 复制'); return; }
+    localStorage.setItem(KEY_CLOUD, JSON.stringify({url: u, key: k}));
+    cfgEditing = false; renderSyncPanel(); toast('云端配置已保存');
+  }else if(act === 'edit-cfg'){
+    cfgEditing = true; renderSyncPanel();
+  }else if(act === 'clear-cfg'){
+    if(!confirm('断开云端配置？本地数据不受影响。')) return;
+    localStorage.removeItem(KEY_CLOUD); localStorage.removeItem(KEY_AUTH); localStorage.removeItem(KEY_SYNCM);
+    renderSyncPanel(); toast('已断开云端');
+  }else if(act === 'copy-sql'){
+    try{
+      await navigator.clipboard.writeText(SYNC_SQL);
+      toast('SQL 已复制');
+    }catch(e){
+      const ta = document.querySelector('.sqlbox');
+      ta.select(); document.execCommand('copy');
+      toast('SQL 已复制');
+    }
+  }else if(act === 'login' || act === 'signup'){
+    const cfg = cloudCfg();
+    if(!cfg){ toast('请先保存项目配置'); return; }
+    const email = ($('syncEmail') || {}).value || '', pwd = ($('syncPwd') || {}).value || '';
+    if(!email || !pwd){ toast('请填写邮箱和密码'); return; }
+    try{
+      const url = cfg.url + (act === 'signup' ? '/auth/v1/signup' : '/auth/v1/token?grant_type=password');
+      const res = await fetch(url, {
+        method: 'POST', headers: {'apikey': cfg.key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({email: email, password: pwd})
+      });
+      const j = await res.json();
+      if(!res.ok) throw new Error(j.error_description || j.msg || j.message || j.error || ('HTTP ' + res.status));
+      if(act === 'signup' && !j.access_token){
+        toast('注册成功！请先打开邮箱点确认链接，再回来登录');
+        return;
+      }
+      setSession(j, email);
+      const newId = (j.user && j.user.id) || '';
+      const prevOwner = data.meta && data.meta.ownerId;
+      if(newId && prevOwner && prevOwner !== newId){
+        const wipe = confirm('检测到本机数据属于上一个账号。\n\n确定 = 清空本机数据，载入这个账号的云端数据\n取消 = 把本机数据当作这个账号的数据使用');
+        const sk0 = getSyncM();
+        delete sk0.lastPushAt;
+        delete sk0.lastCloudUpdatedAt;
+        saveSyncM(sk0);
+        noPush = true;
+        data.meta.ownerId = newId;
+        if(wipe) data = normalizeData({});
+        save();
+        noPush = false;
+        clearTimeout(pushTimer);
+      }
+      renderSyncPanel();
+      toast('登录成功');
+      const r = await cloudPull(true).catch(e => { toast('同步检查失败：' + e.message); return 'error'; });
+      if(r === 'empty' || r === 'unchanged'){
+        const dirty = ((data.meta && data.meta.updatedAt) || 0) !== (getSyncM().lastPushAt === undefined ? -1 : getSyncM().lastPushAt);
+        if(dirty) await cloudPush(false);
+        else if(r === 'empty') toast('云端还没有数据，点「上传到云端」开始同步');
+      }
+    }catch(e){ toast((act === 'signup' ? '注册失败：' : '登录失败：') + e.message); }
+  }else if(act === 'push'){
+    try{ await cloudPush(false); }catch(e){ toast('上传失败：' + e.message); }
+  }else if(act === 'pull'){
+    try{ await cloudPull(false); }catch(e){ toast('下载失败：' + e.message); }
+  }else if(act === 'logout'){
+    localStorage.setItem('qiuzhong-tracker-baked-off', '1');
+    logoutNow();
+    toast('已退出登录');
+  }
+}
+$('syncPanel').addEventListener('click', e => {
+  const b = e.target.closest('[data-sync-act]');
+  if(b) syncAction(b.dataset.syncAct);
+});
+$('syncPanel').addEventListener('change', e => {
+  if(e.target.id === 'syncAuto'){
+    const sk = getSyncM();
+    sk.auto = e.target.checked;
+    saveSyncM(sk);
+    toast(e.target.checked ? '已开启自动上传' : '已关闭自动上传');
+  }
+});
+function logoutNow(){
+  localStorage.setItem('qiuzhong-tracker-baked-off', '1');
+  clearSession();
+  renderSyncPanel();
+}
+$('btnAccount').addEventListener('click', () => {
+  const s = getSession();
+  if(s){
+    if(confirm('当前登录：' + (s.email || '未知账号') + '\n\n确定 = 退出登录（切换其他账号）\n取消 = 保持当前登录')){
+      logoutNow();
+      renderAll();
+      switchView('data');
+      toast('已退出，可在下方登录其他账号');
+    }
+  }else{
+    switchView('data');
+    toast('在「云端同步」里登录或注册账号');
+  }
+});
+
+/* 简历版本管理 */
+function renderResumeManager(){
+  const list = data.resumeVersions || [];
+  $('resumeManager').innerHTML =
+    '<div class="rv-list">' + (list.length ? list.map(v =>
+      '<span class="rv-chip">' + esc(v) + '<button type="button" data-rvdel="' + esc(v) + '" title="删除">×</button></span>').join('')
+      : '<span class="muted">还没有版本，先添加一个</span>') + '</div>' +
+    '<div class="formline" style="margin:8px 0 0">' +
+    '<input id="rvNew" placeholder="新版本名称，如：后端通用版 v3">' +
+    '<button type="button" class="btn sm primary" id="rvAdd">添加版本</button></div>' +
+    '<div class="muted" style="margin-top:4px">删除只是从下拉选项移除，已保存的公司记录不受影响。版本列表会跟随云同步。</div>';
+}
+function toggleResumeManager(){
+  const box = $('resumeManager');
+  box.hidden = !box.hidden;
+  if(!box.hidden) renderResumeManager();
+}
+$('btnRvManage').addEventListener('click', toggleResumeManager);
+$('resumeManager').addEventListener('click', e => {
+  if(e.target.closest('#rvAdd')){
+    const inp = $('rvNew');
+    const name = inp.value.trim();
+    if(!name){ toast('请填写版本名称'); return; }
+    data.resumeVersions = data.resumeVersions || [];
+    if(data.resumeVersions.some(v => v === name)){ toast('已经有这个版本了'); return; }
+    data.resumeVersions.push(name);
+    save();
+    renderResumeManager();
+    fillResumeOptions(byId(modalId) ? byId(modalId).resumeVersion : '');
+    inp.value = '';
+    toast('已添加版本「' + name + '」');
+    return;
+  }
+  const del = e.target.closest('[data-rvdel]');
+  if(del){
+    data.resumeVersions = (data.resumeVersions || []).filter(v => v !== del.dataset.rvdel);
+    save();
+    renderResumeManager();
+    fillResumeOptions(byId(modalId) ? byId(modalId).resumeVersion : '');
+    toast('已删除版本');
+  }
+});
+$('resumeManager').addEventListener('keydown', e => {
+  if(e.target.id === 'rvNew' && e.key === 'Enter') $('rvAdd').click();
+});
+
+/* 抽题自测 */
+let quizQ = null;
+function pickQuiz(){
+  const qs = collectQuestions();
+  const box = $('quizBox');
+  box.hidden = false;
+  if(!qs.length){
+    quizQ = null;
+    box.innerHTML = '<div class="muted">题库还是空的——先把面试复盘记起来，就有题可抽了。</div>';
+    return;
+  }
+  quizQ = qs[Math.floor(Math.random() * qs.length)];
+  box.innerHTML =
+    '<div class="q-label">随机一题 · 来自你自己的面经</div>' +
+    '<div class="q-text">' + esc(quizQ.text) + '</div>' +
+    '<div class="q-meta">来自 <button type="button" class="linklike" data-open-company="' + quizQ.companyId + '">' + esc(quizQ.company) + '</button> · ' + esc(quizQ.round) + ' · ' + fmtDate(quizQ.date) + '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' +
+    '<button type="button" class="btn sm" id="quizNext">🔄 换一题</button>' +
+    '<button type="button" class="btn sm danger" id="quizWeak">😰 答不上，标记相关技能为薄弱</button></div>';
+}
+$('btnQuiz').addEventListener('click', () => {
+  const box = $('quizBox');
+  if(box.hidden) pickQuiz();
+  else box.hidden = true;
+});
+$('quizBox').addEventListener('click', e => {
+  const oc = e.target.closest('[data-open-company]');
+  if(oc){ openCompany(oc.dataset.openCompany); return; }
+  if(e.target.closest('#quizNext')){ pickQuiz(); return; }
+  if(e.target.closest('#quizWeak')){
+    if(!quizQ){ toast('先抽一题'); return; }
+    const hits = (data.skills || []).filter(s => qMatches(quizQ.text, s.name));
+    if(!hits.length){ toast('这题没有关联到技能'); return; }
+    hits.forEach(s => { if(s.mastery !== 1) s.mastery = 1; });
+    save();
+    renderSkills();
+    toast('已把 ' + hits.map(s => s.name).join('、') + ' 标记为薄弱');
+  }
+});
+
+/* ================= 日历与 .ics 导出 ================= */
+let calY, calM;
+function renderCalendar(){
+  if(calY === undefined){ const t = new Date(); calY = t.getFullYear(); calM = t.getMonth(); }
+  $('calTitle').textContent = calY + ' 年 ' + (calM + 1) + ' 月';
+  const byDay = {};
+  data.companies.forEach(c => (c.events || []).forEach(ev => {
+    if(!ev.time) return;
+    const key = ev.time.slice(0, 10);
+    (byDay[key] = byDay[key] || []).push({kind: ev.type, label: ev.time.slice(11, 16) + ' ' + c.name, companyId: c.id});
+  }));
+  data.companies.forEach(c => {
+    if(c.deadline && (c.status === 'wishlist' || c.status === 'applied'))
+      (byDay[c.deadline] = byDay[c.deadline] || []).push({kind: 'DDL', label: '截止 ' + c.name, companyId: c.id});
+  });
+  (data.offers || []).filter(Boolean).forEach(o => {
+    if(o.deadline)
+      (byDay[o.deadline] = byDay[o.deadline] || []).push({kind: 'Offer', label: '答复截止 ' + (o.company || '未命名'), companyId: null});
+  });
+  const startOffset = (new Date(calY, calM, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(calY, calM + 1, 0).getDate();
+  const prevDays = new Date(calY, calM, 0).getDate();
+  const todayKey = dstr(0);
+  let html = '';
+  for(let i = startOffset - 1; i >= 0; i--)
+    html += '<div class="cal-cell other"><div class="cal-day">' + (prevDays - i) + '</div></div>';
+  for(let d = 1; d <= daysInMonth; d++){
+    const key = calY + '-' + String(calM + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const evs = byDay[key] || [];
+    const busy = evs.filter(x => x.kind === '笔试' || x.kind === '面试').length;
+    html += '<div class="cal-cell' + (key === todayKey ? ' today' : '') + (busy >= 2 ? ' clash' : '') + '">' +
+      '<div class="cal-day">' + d + (busy >= 2 ? ' <span class="cal-clash">⚠' + busy + '</span>' : '') + '</div>' +
+      evs.map(ev => '<div class="cal-ev k-' + (ev.kind === '笔试' ? 'v' : ev.kind === '面试' ? 'a' : ev.kind === 'DDL' ? 'r' : 'g') + '"' +
+        (ev.companyId ? ' data-open-company="' + ev.companyId + '"' : '') + '>' + esc(ev.label) + '</div>').join('') +
+      '</div>';
+  }
+  const trail = (7 - (startOffset + daysInMonth) % 7) % 7;
+  for(let i = 1; i <= trail; i++)
+    html += '<div class="cal-cell other"><div class="cal-day">' + i + '</div></div>';
+  $('calBody').innerHTML = html;
+}
+function calShift(n){
+  calM += n;
+  if(calM < 0){ calM = 11; calY--; }
+  if(calM > 11){ calM = 0; calY++; }
+  renderCalendar();
+}
+$('calPrev').addEventListener('click', () => calShift(-1));
+$('calNext').addEventListener('click', () => calShift(1));
+$('calToday').addEventListener('click', () => {
+  const t = new Date();
+  calY = t.getFullYear(); calM = t.getMonth();
+  renderCalendar();
+});
+$('calBody').addEventListener('click', e => {
+  const el = e.target.closest('[data-open-company]');
+  if(el) openCompany(el.dataset.openCompany);
+});
+
+/* .ics 导出 */
+function icsEsc(s){
+  return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+function icsD(d){
+  return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+}
+function icsDT(d){
+  return icsD(d) + 'T' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + '00';
+}
+function buildIcs(){
+  const now = new Date();
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//QiuzhongTracker//CN', 'CALSCALE:GREGORIAN'];
+  let n = 0;
+  data.companies.forEach(c => (c.events || []).forEach(ev => {
+    if(!ev.time) return;
+    const dt = new Date(ev.time);
+    if(isNaN(dt)) return;
+    const end = new Date(dt.getTime() + (ev.type === '笔试' ? 2 : 1) * 3600 * 1000);
+    lines.push('BEGIN:VEVENT', 'UID:' + ev.id + '@qiuzhong', 'DTSTAMP:' + icsDT(now),
+      'DTSTART:' + icsDT(dt), 'DTEND:' + icsDT(end),
+      'SUMMARY:' + icsEsc('【' + ev.type + '】' + c.name),
+      'DESCRIPTION:' + icsEsc((c.position ? '岗位：' + c.position + '\n' : '') + (ev.note || '')),
+      'END:VEVENT');
+    n++;
+  }));
+  data.companies.forEach(c => {
+    if(c.deadline && (c.status === 'wishlist' || c.status === 'applied')){
+      lines.push('BEGIN:VEVENT', 'UID:ddl-' + c.id + '@qiuzhong', 'DTSTAMP:' + icsDT(now),
+        'DTSTART;VALUE=DATE:' + icsD(parseDate(c.deadline)),
+        'SUMMARY:' + icsEsc('【网申截止】' + c.name), 'END:VEVENT');
+      n++;
+    }
+  });
+  (data.offers || []).filter(Boolean).forEach(o => {
+    if(o.deadline){
+      lines.push('BEGIN:VEVENT', 'UID:offer-' + o.id + '@qiuzhong', 'DTSTAMP:' + icsDT(now),
+        'DTSTART;VALUE=DATE:' + icsD(parseDate(o.deadline)),
+        'SUMMARY:' + icsEsc('【Offer答复截止】' + (o.company || '未命名')), 'END:VEVENT');
+      n++;
+    }
+  });
+  lines.push('END:VCALENDAR');
+  return {text: lines.join('\r\n'), count: n};
+}
+$('btnExportIcs').addEventListener('click', () => {
+  const ics = buildIcs();
+  if(!ics.count){ toast('还没有可导出的日程'); return; }
+  const blob = new Blob([ics.text], {type: 'text/calendar;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '秋招日程.ics';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('已导出 ' + ics.count + ' 条日程，导入日历即可收到提醒');
+});
+
+/* ================= 皮肤 ================= */
+const THEMES = [
+  {key: '', name: '🌊 默认清爽'},
+  {key: 'auto', name: '🌗 跟随系统'},
+  {key: 'autumn', name: '🍂 秋日暖橙'},
+  {key: 'dark', name: '🌙 深夜模式'},
+  {key: 'sakura', name: '🌸 樱花物语'},
+  {key: 'matcha', name: '🌿 抹茶清风'},
+];
+const darkMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+function getUi(){
+  try{ return JSON.parse(localStorage.getItem('qiuzhong-tracker-ui') || '{}') || {}; }catch(e){ return {}; }
+}
+function setUiPatch(patch){
+  const ui = getUi();
+  Object.assign(ui, patch);
+  try{ localStorage.setItem('qiuzhong-tracker-ui', JSON.stringify(ui)); }catch(e){}
+}
+function applyAutoTheme(){
+  const dark = darkMedia && darkMedia.matches;
+  if(dark) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+}
+function applyTheme(key){
+  if(key === 'auto') applyAutoTheme();
+  else if(key) document.documentElement.setAttribute('data-theme', key);
+  else document.documentElement.removeAttribute('data-theme');
+  setUiPatch({theme: key});
+}
+if(darkMedia && darkMedia.addEventListener) darkMedia.addEventListener('change', () => {
+  if(getUi().theme === 'auto') applyAutoTheme();
+});
+
+/* 设备识别：≤768px 视口自动进入手机布局 */
+const mobileMq = window.matchMedia('(max-width: 768px)');
+function applyDeviceMode(){
+  document.documentElement.classList.toggle('mobile', mobileMq.matches);
+  if(typeof renderBoard === 'function') renderBoard();
+}
+if(mobileMq.addEventListener) mobileMq.addEventListener('change', applyDeviceMode);
+else if(mobileMq.addListener) mobileMq.addListener(applyDeviceMode);
+applyDeviceMode();
+function renderThemePanel(){
+  const cur = getUi().theme || '';
+  $('themePanel').innerHTML = '<div class="theme-title">选择皮肤</div>' + THEMES.map(t =>
+    '<button type="button" class="theme-opt' + (t.key === cur ? ' active' : '') + '" data-theme-key="' + t.key + '">' + t.name + '</button>').join('');
+}
+$('btnTheme').addEventListener('click', e => {
+  e.stopPropagation();
+  const p = $('themePanel');
+  if(p.hidden){ renderThemePanel(); p.hidden = false; }
+  else p.hidden = true;
+});
+$('themePanel').addEventListener('click', e => {
+  const b = e.target.closest('[data-theme-key]');
+  if(!b) return;
+  applyTheme(b.dataset.themeKey);
+  $('themePanel').hidden = true;
+  const t = THEMES.find(x => x.key === b.dataset.themeKey);
+  toast('皮肤已切换：' + (t ? t.name : ''));
+});
+document.addEventListener('click', e => {
+  const p = $('themePanel');
+  if(p && !p.hidden && !e.target.closest('#themePanel') && !e.target.closest('#btnTheme')) p.hidden = true;
+});
+
+/* ================= 初始化 ================= */
+if(!Array.isArray(data.offers)) data.offers = [];
+if(!Array.isArray(data.practice)) data.practice = [];
+if(!Array.isArray(data.skills)) data.skills = [];
+migrateResumeVersions();
+try{
+  if(!localStorage.getItem(KEY_AUTH) && !localStorage.getItem('qiuzhong-tracker-baked-off')
+    && BAKED_SESSION && BAKED_SESSION.refresh_token)
+    localStorage.setItem(KEY_AUTH, JSON.stringify(BAKED_SESSION));
+}catch(e){}
+(function restoreView(){
+  const saved = getUi();
+  if(saved && saved.view && viewEls[saved.view]){
+    document.querySelectorAll('.tabs button').forEach(b =>
+      b.classList.toggle('active', b.dataset.view === saved.view));
+    for(const k in viewEls) viewEls[k].hidden = (k !== saved.view);
+  }
+  if(saved && saved.theme) applyTheme(saved.theme);
+})();
+renderAll();
+if(cloudCfg() && getSession()){
+  setTimeout(async () => {
+    for(let attempt = 0; attempt < 3; attempt++){
+      try{
+        const r = await cloudPull(true);
+        if(r === 'unchanged' || r === 'empty'){
+          const dirty = ((data.meta && data.meta.updatedAt) || 0) !== (getSyncM().lastPushAt === undefined ? -1 : getSyncM().lastPushAt);
+          const isEmptyLocal = !data.companies.length && !(data.offers || []).length
+            && !(data.practice || []).length && !(data.skills || []).length;
+          if(dirty && !isEmptyLocal) await cloudPush(true);
+        }
+        return;
+      }catch(e){
+        if(attempt < 2) await new Promise(res => setTimeout(res, 4000));
+      }
+    }
+  }, 1500);
+}
+</script>
+</body>
+</html>
