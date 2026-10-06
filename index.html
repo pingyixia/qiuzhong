@@ -333,7 +333,7 @@ html[data-theme="dark"] .evt-row .del,html[data-theme="dark"] .rb-del{color:#647
 .cal-head-row div{padding:4px 0}
 .cal-cell{background:#fff;border:1px solid #f0f1f3;border-radius:10px;min-height:92px;padding:6px;font-size:12px;overflow:hidden}
 .cal-cell.other{background:transparent;border-color:transparent;opacity:.4}
-.cal-cell.today{border-color:#6366f1;box-shadow:0 0 0 2px rgba(99,102,241,.18)}
+.cal-cell.today{border-color:rgb(var(--today));box-shadow:0 0 0 2px rgba(var(--today),.18);animation:todayGlow 2.6s ease-in-out infinite}
 .cal-cell.clash{border-color:#fca5a5;background:#fff7f7}
 .cal-day{font-weight:600;margin-bottom:4px;color:#374151}
 .cal-clash{color:#b91c1c;font-size:11px;font-weight:700}
@@ -358,6 +358,51 @@ html[data-theme="sakura"] .cal-cell{background:#fffdfe;border-color:#f4d7e2}
 html[data-theme="sakura"] .cal-cell.today{border-color:#db2777;box-shadow:0 0 0 2px rgba(219,39,119,.15)}
 html[data-theme="matcha"] .cal-cell{background:#fcfefc;border-color:#d5e6d3}
 html[data-theme="matcha"] .cal-cell.today{border-color:#059669;box-shadow:0 0 0 2px rgba(5,150,105,.15)}
+
+/* ---------- UI 精修 ---------- */
+body{background:linear-gradient(180deg,#f7f8fc 0%,#f3f4f8 320px,#f4f5f7 100%)}
+.topbar{background:rgba(255,255,255,.84);backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px)}
+.brand{letter-spacing:.2px}
+.btn,.tabs button,.x,.del,.rb-del{transition:background .15s,color .15s,border-color .15s,transform .12s,box-shadow .15s}
+.btn.primary{box-shadow:0 2px 10px rgba(79,70,229,.26)}
+.btn.primary:active{transform:scale(.98)}
+.panel,.stat{transition:box-shadow .18s,transform .18s}
+.panel:hover,.stat:hover{box-shadow:0 4px 16px rgba(17,24,39,.08)}
+.card{transition:transform .15s,box-shadow .15s,border-color .15s}
+main>section{animation:viewIn .22s ease}
+.modal{animation:modalIn .18s ease}
+.cal-ev{transition:filter .12s}
+@keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:none}}
+@media(hover:hover){
+  .btn:hover{transform:translateY(-1px)}
+  .btn.primary:hover{box-shadow:0 4px 14px rgba(79,70,229,.34)}
+  .card:hover{transform:translateY(-2px)}
+  .stat:hover{transform:translateY(-2px)}
+  .cal-ev:hover{filter:brightness(.95)}
+}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#c6cad4;border-radius:8px;border:2px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:#aab0bc;border:2px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-track{background:transparent}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#3b4a63;border:2px solid transparent;background-clip:content-box}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#4c5e7d;background-clip:content-box}
+html[data-theme="dark"] .topbar{background:rgba(30,41,59,.86);backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- 灵动动效 ---------- */
+:root{--today:99,102,241}
+html[data-theme="dark"]{--today:129,140,248}
+html[data-theme="autumn"]{--today:234,88,12}
+html[data-theme="sakura"]{--today:219,39,119}
+html[data-theme="matcha"]{--today:5,150,105}
+.card{animation:cardIn .22s ease both}
+@keyframes cardIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.card.dragging{transform:rotate(2deg) scale(1.03);box-shadow:0 12px 26px rgba(17,24,39,.2);cursor:grabbing;opacity:.92}
+.col-head{border-radius:8px}
+.round-block,.quiz-box,.res-manager{animation:cardIn .18s ease both}
+.cal-cell.today{border-color:rgb(var(--today));box-shadow:0 0 0 2px rgba(var(--today),.18);animation:todayGlow 2.6s ease-in-out infinite}
+@keyframes todayGlow{0%,100%{box-shadow:0 0 0 2px rgba(var(--today),.18)}50%{box-shadow:0 0 0 5px rgba(var(--today),.07)}}
 </style>
 </head>
 <body>
@@ -755,6 +800,7 @@ function renderDashboard(){
     odlPanel +
     '<div class="panel"><div class="panel-h">📅 未来 7 天日程</div>' + evRows + '</div>' +
     '<div class="panel"><div class="panel-h">⏰ 网申 DDL<span class="hint">仅「待投递 / 已投递」状态的公司</span></div>' + ddlRows + '</div>';
+  document.querySelectorAll('#view-dashboard .stat .n').forEach(countUp);
 }
 
 /* ================= 看板 ================= */
@@ -772,9 +818,10 @@ function nextEventChip(c){
   const hm = up.time.slice(11,16);
   return '<span class="chip ' + (EVT_CLS[up.type]||'chip-g') + '">' + esc(up.type) + ' ' + md + ' ' + hm + '</span>';
 }
-function cardHTML(c){
+function cardHTML(c, i){
   const showDdl = c.deadline && c.status !== 'offer' && c.status !== 'rejected';
-  return '<div class="card" draggable="true" data-id="' + c.id + '">' +
+  return '<div class="card" draggable="true" data-id="' + c.id + '"' +
+    (i !== undefined ? ' style="animation-delay:' + Math.min(i, 8) * 35 + 'ms"' : '') + '>' +
     '<div class="card-title">' + esc(c.name) + '</div>' +
     (c.position ? '<div class="card-pos">' + esc(c.position) + '</div>' : '') +
     '<div class="card-meta">' +
@@ -798,9 +845,9 @@ function renderBoard(){
       if(da !== db) return da < db ? -1 : 1;
       return (a.name || '').localeCompare(b.name || '', 'zh');
     });
-    return '<div class="col"><div class="col-head"><span class="dot" style="background:' + s.color + '"></span>' +
+    return '<div class="col"><div class="col-head" style="background:linear-gradient(180deg,' + s.color + '1c,' + s.color + '05)"><span class="dot" style="background:' + s.color + '"></span>' +
       s.label + '<span class="count">' + cards.length + '</span></div>' +
-      '<div class="col-body" data-status="' + s.key + '">' + cards.map(cardHTML).join('') + '</div></div>';
+      '<div class="col-body" data-status="' + s.key + '">' + cards.map((c, i) => cardHTML(c, i)).join('') + '</div></div>';
   }).join('');
   wrap.innerHTML = (document.documentElement.classList.contains('mobile')
     ? '<div class="board-hint">← 左右滑动切换状态列 · 点卡片可改状态 →</div>' : '') +
@@ -841,10 +888,16 @@ boardEl.addEventListener('drop', e => {
   const id = e.dataTransfer.getData('text/plain');
   const c = byId(id);
   if(c && c.status !== body.dataset.status){
+    const wasOffer = c.status === 'offer';
     c.status = body.dataset.status;
     c.updatedAt = Date.now();
     save(); renderAll();
-    toast('「' + c.name + '」→ ' + SM[c.status].label);
+    if(c.status === 'offer' && !wasOffer){
+      confetti(e.clientX || window.innerWidth / 2, e.clientY || 150);
+      toast('🎉 恭喜拿到 Offer！');
+    }else{
+      toast('「' + c.name + '」→ ' + SM[c.status].label);
+    }
   }
 });
 boardEl.addEventListener('click', e => {
@@ -911,9 +964,14 @@ function bindField(elId, prop, onChange){
   function apply(){
     const c = byId(modalId);
     if(!c) return;
+    const old = c[prop];
     c[prop] = $(elId).value;
     c.updatedAt = Date.now();
     save();
+    if(prop === 'status' && c[prop] === 'offer' && old !== 'offer'){
+      confetti(window.innerWidth / 2, 140);
+      toast('🎉 恭喜拿到 Offer！');
+    }
     if(prop === 'name') $('mTitle').textContent = c.name || '未命名公司';
     if(prop === 'position') $('mSub').textContent = c.position || '';
     renderDashboard(); renderBoard(); renderDataStats();
@@ -1178,6 +1236,36 @@ function toast(msg){
   el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+/* ================= 动效工具 ================= */
+function confetti(x, y){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#f97316'];
+  for(let i = 0; i < 28; i++){
+    const p = document.createElement('div');
+    p.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:8px;height:' +
+      (5 + Math.random() * 7) + 'px;background:' + colors[i % colors.length] +
+      ';border-radius:2px;pointer-events:none;z-index:9999';
+    document.body.appendChild(p);
+    const ang = Math.random() * Math.PI * 2, dist = 60 + Math.random() * 130;
+    const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist - 80;
+    p.animate([
+      {transform: 'translate(0,0) rotate(0)', opacity: 1},
+      {transform: 'translate(' + dx + 'px,' + (dy + 150) + 'px) rotate(' + (Math.random() * 720 - 360) + 'deg)', opacity: 0}
+    ], {duration: 900 + Math.random() * 500, easing: 'cubic-bezier(.2,.6,.3,1)'}).onfinish = () => p.remove();
+  }
+}
+function countUp(el){
+  const target = Number(el.textContent) || 0;
+  if(!target || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const t0 = performance.now(), dur = 450;
+  function step(t){
+    const k = Math.min(1, (t - t0) / dur);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+    if(k < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 /* ================= 刷题打卡 ================= */
