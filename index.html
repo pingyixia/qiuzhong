@@ -564,6 +564,10 @@ html[data-theme="matcha"]{--today:5,150,105}
     <div class="modal-body">
       <div class="field"><label>公司名称 *</label><input id="addName" placeholder="如：字节跳动"></div>
       <div class="field"><label>岗位</label><input id="addPos" placeholder="如：后端开发工程师"></div>
+      <button type="button" class="btn sm" id="addOcrBtn" style="margin:-4px 0 10px">📷 从截图识别公司和岗位</button>
+      <input type="file" id="addOcrFile" accept="image/*" class="hiddenfile">
+      <div id="addOcrProgress" class="muted" hidden style="margin-bottom:8px"></div>
+      <textarea id="addOcrRaw" rows="3" hidden style="font-size:12px;margin-bottom:8px" placeholder="识别原文"></textarea>
       <div class="modal-foot" style="border:none;padding:0">
         <div class="grow"></div>
         <button class="btn" data-act="close-add">取消</button>
@@ -605,7 +609,24 @@ html[data-theme="matcha"]{--today:5,150,105}
       </div>
 
       <div class="sec">
-        <div class="sec-head">面试复盘 <span class="hint">每轮结束后记一笔，越记越强</span></div>
+        <div class="sec-head">面试复盘 <span class="hint">每轮结束后记一笔，越记越强</span>
+          <span style="margin-left:auto"><button class="btn sm" id="btnOcr" type="button">📷 图片转文字</button></span>
+        </div>
+        <div id="ocrBox" class="quiz-box" hidden>
+          <div class="q-label">截图 / 拍照 → 提取文字（支持直接 Ctrl+V 粘贴图片；首次使用需联网下载中文识别包约 15MB，之后浏览器缓存秒开；图片不会上传，识别在你设备本地完成）</div>
+          <div class="formline" style="margin:8px 0 0">
+            <button type="button" class="btn sm" id="ocrPick">选择图片</button>
+            <input type="file" id="ocrFile" accept="image/*" class="hiddenfile">
+            <span class="muted" style="flex:1">或截图后直接 Ctrl+V</span>
+          </div>
+          <div id="ocrProgress" class="muted" style="margin-top:6px" hidden></div>
+          <textarea id="ocrResult" rows="4" style="margin-top:8px;font-size:13px" hidden placeholder="识别结果（可编辑）"></textarea>
+          <div id="ocrActions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px" hidden>
+            <button type="button" class="btn sm primary" id="ocrToQ">填入复盘「被问了什么」</button>
+            <button type="button" class="btn sm" id="ocrToNotes">填入备注</button>
+            <button type="button" class="btn sm" id="ocrCopy">复制文本</button>
+          </div>
+        </div>
         <div class="formline">
           <select id="rdRound" class="w-s"><option>笔试</option><option>一面</option><option>二面</option><option>三面</option><option>HR面</option><option>其他</option></select>
           <input id="rdDate" type="date">
@@ -1998,6 +2019,159 @@ $('quizBox').addEventListener('click', e => {
     toast('已把 ' + hits.map(s => s.name).join('、') + ' 标记为薄弱');
   }
 });
+
+/* 图片转文字（本地 OCR，Tesseract.js 按需从 CDN 加载） */
+let tesseractLoading = null, ocrWorker = null, lastOcrText = '';
+function loadTesseract(){
+  if(window.Tesseract) return Promise.resolve();
+  if(!tesseractLoading){
+    const urls = ['https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
+                  'https://unpkg.com/tesseract.js@5/dist/tesseract.min.js'];
+    tesseractLoading = urls.reduce((chain, url) => chain.catch(() => new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = url;
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('识别引擎加载失败，请检查网络后重试'));
+      document.head.appendChild(s);
+    })), Promise.reject());
+  }
+  return tesseractLoading;
+}
+function ocrProgress(msg){ const p = $('ocrProgress'); p.hidden = false; p.textContent = msg; }
+function squeezeCjk(s){
+  return String(s || '').replace(/([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])[ \t]+(?=[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])/g, '$1');
+}
+async function ocrRecognize(file, onProgress){
+  const report = onProgress || ocrProgress;
+  report('正在加载识别引擎…（首次使用会下载中文语言包，请保持联网）');
+  await loadTesseract();
+  if(!ocrWorker){
+    report('正在初始化中文识别模型…（约 15MB，仅第一次）');
+    ocrWorker = await Tesseract.createWorker('chi_sim+eng', 1, {
+      logger: m => { if(m.status === 'recognizing text') report('识别中… ' + Math.round(m.progress * 100) + '%'); }
+    });
+  }
+  report('识别中…');
+  const res = await ocrWorker.recognize(file);
+  return squeezeCjk((res.data.text || '').trim());
+}
+async function runOcr(file){
+  const btn = $('ocrPick');
+  btn.disabled = true;
+  try{
+    const text = await ocrRecognize(file, msg => ocrProgress(msg));
+    lastOcrText = text;
+    const out = $('ocrResult');
+    out.hidden = false;
+    out.value = text || '（没有识别到文字，试试更清晰的截图）';
+    $('ocrActions').hidden = false;
+    if(text) toast('识别完成，共 ' + text.length + ' 字');
+    else toast('没有识别到文字');
+  }catch(e){
+    ocrProgress('识别失败：' + e.message);
+    toast('识别失败：' + e.message);
+  }
+  btn.disabled = false;
+}
+$('btnOcr').addEventListener('click', () => {
+  const box = $('ocrBox');
+  box.hidden = !box.hidden;
+});
+$('ocrPick').addEventListener('click', () => $('ocrFile').click());
+$('ocrFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if(f) runOcr(f);
+});
+document.addEventListener('paste', e => {
+  const items = (e.clipboardData || {}).items || [];
+  let imgFile = null;
+  for(const it of items){
+    if(it.type && it.type.indexOf('image') === 0){ imgFile = it.getAsFile(); break; }
+  }
+  if(!imgFile) return;
+  const ocrBox = $('ocrBox');
+  if(ocrBox && !ocrBox.hidden && modalId){ e.preventDefault(); runOcr(imgFile); return; }
+  const addBox = $('addBack');
+  if(addBox && !addBox.hidden){ e.preventDefault(); runAddOcr(imgFile); }
+});
+$('ocrToQ').addEventListener('click', () => {
+  if(!lastOcrText){ toast('还没有识别结果'); return; }
+  const el = $('rdQ');
+  el.value = el.value ? el.value + '\n' + lastOcrText : lastOcrText;
+  toast('已填入「被问了什么」，记得点添加复盘');
+});
+$('ocrToNotes').addEventListener('click', () => {
+  const c = byId(modalId);
+  if(!c || !lastOcrText){ toast('还没有识别结果'); return; }
+  c.notes = c.notes ? c.notes + '\n' + lastOcrText : lastOcrText;
+  c.updatedAt = Date.now();
+  save();
+  $('fNotes').value = c.notes;
+  toast('已填入备注');
+});
+$('ocrCopy').addEventListener('click', async () => {
+  if(!lastOcrText){ toast('还没有识别结果'); return; }
+  try{
+    await navigator.clipboard.writeText(lastOcrText);
+    toast('已复制');
+  }catch(e){
+    const ta = $('ocrResult');
+    ta.select(); document.execCommand('copy');
+    toast('已复制');
+  }
+});
+
+/* 新建投递：从 JD 截图识别公司和岗位 */
+const SITE_WATERMARKS = /(BOSS直聘|拉勾|拉勾网|智联招聘|前程无忧|51job|猎聘|牛客|实习僧|海投网|应届生求职|大街网|猎头)/i;
+function parseJd(text){
+  const lines = String(text || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  let company = '', position = '';
+  for(const line of lines){
+    let m = line.match(/(?:公司名称|公司全称|公司|企业)\s*[：:]\s*(.+)/);
+    if(m && !company){ company = m[1].trim(); continue; }
+    m = line.match(/(?:职位名称|岗位名称|招聘职位|招聘岗位|职位|岗位)\s*[：:]\s*(.+)/);
+    if(m && !position){ position = m[1].trim(); }
+  }
+  const plain = lines.filter(l => !/(公司|职位|岗位|企业)\s*[：:]/.test(l) && !SITE_WATERMARKS.test(l));
+  if(!company && plain.length) company = plain[0].replace(/[|｜·—\-–].*$/, '').trim().slice(0, 30);
+  if(!position){
+    const rest = plain.filter(l => l !== company);
+    if(rest.length) position = rest[0].slice(0, 40);
+  }
+  return {company: company || '', position: position || ''};
+}
+let lastAddOcrText = '';
+async function runAddOcr(file){
+  const btn = $('addOcrBtn');
+  btn.disabled = true;
+  const prog = $('addOcrProgress');
+  prog.hidden = false;
+  try{
+    const text = await ocrRecognize(file, msg => prog.textContent = msg);
+    lastAddOcrText = text;
+    const parsed = parseJd(text);
+    if(parsed.company) $('addName').value = parsed.company;
+    if(parsed.position) $('addPos').value = parsed.position;
+    const raw = $('addOcrRaw');
+    raw.hidden = false;
+    raw.value = text;
+    prog.hidden = true;
+    toast(parsed.company ? '已识别填入，请核对后创建' : '识别完成，未认出公司名，请手动补填');
+  }catch(e){
+    prog.textContent = '识别失败：' + e.message;
+    toast('识别失败：' + e.message);
+  }
+  btn.disabled = false;
+}
+$('addOcrBtn').addEventListener('click', () => $('addOcrFile').click());
+$('addOcrFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if(f) runAddOcr(f);
+});
+$('addOcrRaw').addEventListener('input', () => { lastAddOcrText = $('addOcrRaw').value; });
+$('addOcrRaw').addEventListener('dblclick', () => { $('addOcrRaw').hidden = false; });
 
 /* ================= 日历与 .ics 导出 ================= */
 let calY, calM;
